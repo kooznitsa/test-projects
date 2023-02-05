@@ -1,0 +1,66 @@
+{% extends 'main.html' %}
+{% block content %}
+{% load static %}
+
+<main>
+    <div class="container-fluid mx-auto w-75 p-3 mb-5">
+        <h1 class="mt-5 mb-3 text-dark">Flights from Dubai to Bangkok</h1>
+
+        <form id="sortForm" method="GET" action="{% url 'flights' %}" class="mb-3">
+            <span class="pe-3">Sort by</span> 
+            {% for key, value in sort_options.items %}
+            <div class="form-check form-check-inline ps-1">
+                <input type="radio" class="btn-check" name="sort" id={{key}} autocomplete="off" value={{key}} {% if request.GET.sort == key %}checked="checked"{% endif %}>
+                <label class="btn btn-outline-primary" for={{key}}>{{value.view}}</label>
+            </div>
+            {% endfor %}
+
+            <div class="form-check form-check-inline form-switch">
+                <input class="form-check-input" name="onward_only" value="1" type="checkbox" role="switch" id="flexSwitchCheckDefault" {% if request.GET.onward_only == "1" %}checked="checked"{% endif %}>
+                <label class="form-check-label" for="flexSwitchCheckDefault">Onward flights only</label>
+            </div>
+
+            <button type="submit" class="btn btn-warning mr-3">APPLY</button>
+            <a href="{% url 'flights' %}" id="refresh-btn" type="button" title="Reset"><img src="{% static 'images/refresh.png' %}" style="width: 40px; height: 40px;" /></a>
+        </form>
+
+        {% regroup flights by itinerary_count.container_count as group %}
+
+        {% for f_items in group %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>ROUTE {{f_items.grouper.container_count}}</h5>
+            </div>
+
+            {% regroup f_items.list by itinerary_count as it_list %}
+
+            {% for ff in it_list %}
+            <div class="card-body">
+                <p><strong>{{ff.grouper.priced_itinerary.priced_itinerary|upper}}</strong></p>
+                <p><strong>TOTAL FLIGHT TIME: {{ff.grouper.total_flight_time}} min</strong></p>
+            </div>
+
+            {% for f in ff.list|dictsort:"flight_part" %}
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <p class="text-primary"><strong>{% if f.direct_flight %}DIRECT {% elif not f.direct_flight %}PART {{f.flight_part}} {% endif %} FLIGHT — FROM {{f.source.city}} TO {{f.destination.city}}</strong></p>
+                    <p>FLIGHT NO.: {{f.flight_num}} {{f.carrier.carrier}} (Class {{f.class_field.class_field}})</p>
+                    <p>DEPARTURE TIME: {{f.departure_time}}</p>
+                    <p>ARRIVAL TIME: {{f.arrival_time}}</p>
+                    <p>FLIGHT TIME: {{f.flight_time}} min</p>
+                </li>
+            </ul>
+            {% endfor %}
+            {% endfor %}
+
+            <div class="card-footer">
+                <p><strong>TOTAL PRICE: {{f_items.grouper.currency.currency}} {{f_items.grouper.adult_price}}</strong></p>
+                <p>REQUEST TIME: {{f_items.grouper.request_time}}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% include 'pagination.html' with queryset=flights custom_range=custom_range %}
+</main>
+
+{% endblock %}
