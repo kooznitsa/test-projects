@@ -1,11 +1,13 @@
 from datetime import datetime
 from django.shortcuts import render
+from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
 
 from .models import Flights
 from .utils import paginate_flights, get_stats, SORT_OPTIONS, DEFAULT_SORT, PAGES_NUM
 
 
-def flights(request):
+def flights(request: HttpRequest) -> HttpResponse:
     if onward_only := request.GET.get('onward_only'):
         all_flights = Flights.objects.filter(itinerary_count__priced_itinerary=onward_only)
     else:
@@ -25,7 +27,36 @@ def flights(request):
     return render(request, 'flights/flights.html', context)
 
 
-def stats(request):
+def best_options(request: HttpRequest) -> HttpResponse:
+    """Best flights criteria:
+    - direct flights or
+    - total adult price less than SGD 450 or
+    - total flight time less than 550 min
+    """
+    flights = Flights.objects.filter(itinerary_count__priced_itinerary=1).order_by('itinerary_count')
+
+    MAX_PRICE = 450
+    MAX_FLIGHT_TIME = 550
+
+    best_options = flights.filter(
+        Q(direct_flight=True)
+        | Q(itinerary_count__container_count__adult_price__lte=MAX_PRICE)
+        | Q(itinerary_count__total_flight_time__lte=550)
+    )
+
+    best_options, custom_range = paginate_flights(request, best_options, PAGES_NUM)
+
+    context = {
+        'best_options': best_options,
+        'custom_range': custom_range,
+        'max_price': MAX_PRICE,
+        'max_flight_time': MAX_FLIGHT_TIME,
+    }
+
+    return render(request, 'flights/best_options.html', context)
+
+
+def stats(request: HttpRequest) -> HttpResponse:
     req_time_1 = datetime(2015, 9, 28, 20, 23, 49)
     req_time_2 = datetime(2015, 9, 28, 20, 30, 19)
 

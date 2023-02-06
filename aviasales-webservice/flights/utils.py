@@ -1,5 +1,9 @@
+from datetime import datetime
+from typing import Iterable
 from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import HttpRequest
+from django.db.models.query import QuerySet
 
 from .models import Flights
 
@@ -27,7 +31,9 @@ DEFAULT_SORT = 'price_asc'
 PAGES_NUM = 12
 
 
-def paginate_flights(request, flights, results):
+def paginate_flights(request: HttpRequest, 
+                    flights: QuerySet[Flights], 
+                    results: QuerySet) -> tuple[QuerySet[Flights], Iterable]:
     page = request.GET.get('page')
     paginator = Paginator(flights, results)
 
@@ -53,7 +59,7 @@ def paginate_flights(request, flights, results):
     return flights, custom_range
 
 
-def get_stats(date):
+def get_stats(date: datetime) -> tuple[int, int, float, float]:
     req = Flights.objects.filter(itinerary_count__container_count__request_time=date)
     total_itineraries = req.aggregate(Count('itinerary_count'))
 
