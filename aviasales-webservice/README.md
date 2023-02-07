@@ -16,7 +16,9 @@ Implementation language: Python 3, format: JSON + libraries and tools of your ch
 We will evaluate the ability to perform a task with incomplete data about it, the ability to make decisions independently, and the quality of the code.
 
 ## Tech Stack
-<img src="https://img.shields.io/badge/Python-d93b32?style=for-the-badge&logo=python&logoColor=black"/> <img src="https://img.shields.io/badge/Django-fc884d?style=for-the-badge&logo=django&logoColor=black"/> <img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/>
+<img src="https://img.shields.io/badge/Python-d93b32?style=for-the-badge&logo=python&logoColor=black"/> <img src="https://img.shields.io/badge/Django-fc884d?style=for-the-badge&logo=django&logoColor=black"/>
+<img src="https://img.shields.io/badge/DJANGO REST-fc884d?style=for-the-badge"/> 
+<img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/>
 
 ## Database Structure
 ![database-diagram.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/database/database_diagram.png)
@@ -44,7 +46,7 @@ Criteria:
 ### API
 - Top 10 cheapest flights
 - Top 10 most expensive flights
-- Top 10 falstest flights
+- Top 10 fastest flights
 - Top 10 longest flights
 ![api_fastest.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/api_fastest.png)
 
