@@ -20,3 +20,33 @@ We will evaluate the ability to perform a task with incomplete data about it, th
 
 ## Database Structure
 ![database-diagram.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/database/database_diagram.png)
+
+## Project Structure
+
+### Main page: all flights
+Sorting options:
+- by price ASC
+- by price DESC
+- by flight time ASC
+- by flight time DESC
+![all_flights.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/all_flights.png)
+
+### Best options
+Criteria:
+- Direct flights or
+- Cheap flights or
+- Fast flights
+![best_options.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/best_options.png)
+
+### Requests comparison
+![flight_stats.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/flight_stats.png)
+
+### API
+- Top 10 cheapest flights
+- Top 10 most expensive flights
+- Top 10 falstest flights
+- Top 10 longest flights
+![api_fastest.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/api_fastest.png)
+
+### API (web)
+![top_cheapest.png](https://raw.githubusercontent.com/kooznitsa/test-projects/main/aviasales-webservice/screenshots/top_cheapest.png)
