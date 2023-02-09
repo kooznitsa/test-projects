@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from .confidential import DATABASE_CONNECTION, secret_key
@@ -21,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'database.apps.DatabaseConfig',
     'flights.apps.FlightsConfig',
     'bootstrap5',
     'rest_framework',
