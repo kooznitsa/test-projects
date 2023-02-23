@@ -20,7 +20,7 @@ def get_routes(request: HttpRequest) -> JsonResponse:
 
 
 class FlightsListAPIView(generics.ListAPIView):
-    queryset = Containers.objects.all()
+    queryset = Containers.objects.distinct()
     serializer_class = ContainersSerializer
 
     def __init__(self) -> None:

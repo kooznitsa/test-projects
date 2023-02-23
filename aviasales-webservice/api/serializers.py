@@ -31,7 +31,6 @@ class ContainersSerializer(serializers.ModelSerializer):
     def get_itineraries(self, obj: Containers) -> ReturnList:
         itineraries = obj.itineraries_set.all()
         serializer = ItinerariesSerializer(itineraries, many=True)
-        print(type(serializer.data))
         return serializer.data
 
     class Meta:

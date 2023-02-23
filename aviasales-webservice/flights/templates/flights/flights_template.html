@@ -6,7 +6,7 @@
     <div class="container-fluid mx-auto w-75 p-3 mb-5">
         <h1 class="mt-5 mb-3 text-dark">Flights from Dubai to Bangkok</h1>
 
-        {% if queryset == flights %}
+        {% if queryset == containers %}
         <form id="sortForm" method="GET" action="{% url 'flights' %}" class="mb-3">
             <span class="pe-3">Sort by</span> 
             {% for key, value in sort_options.items %}
@@ -26,58 +26,52 @@
         </form>
         {% endif %}
 
-        {% regroup queryset by itinerary_count.container_count as group %}
+        {% for container in queryset %}
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h4 class="card-title">ROUTE {{container.container_count}}</h4>
+                </div>
 
-        {% for f_items in group %}
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>ROUTE {{f_items.grouper.container_count}}</h5>
-            </div>
-
-            {% regroup f_items.list by itinerary_count as it_list %}
-
-            {% for ff in it_list %}
-
-            {% if queryset == best_options %}
-            <div class="card-body">
-                {% for f in ff.list|slice:1 %} 
-                {% if ff.grouper.total_flight_time <= max_flight_time %}
-                <span class="badge bg-secondary text-light">Faster flight</span>
+                {% if queryset == best_options %}
+                <div class="card-body"> 
+                    {% if container.itineraries_set.all.0.total_flight_time <= max_flight_time %}
+                    <span class="badge bg-secondary text-light">Faster flight</span>
+                    {% endif %}
+                    {% if container.itineraries_set.all.0.flights_set.all.0.direct_flight %}
+                    <span class="badge bg-warning text-dark">Direct flight</span>
+                    {% endif %}
+                    {% if container.adult_price <= max_price %}
+                    <span class="badge bg-info text-dark">Cheaper flight</span>
+                    {% endif %}
+                </div>
                 {% endif %}
-                {% if f.direct_flight %}
-                <span class="badge bg-warning text-dark">Direct flight</span>
-                {% endif %}
-                {% if f_items.grouper.adult_price <= max_price %}
-                <span class="badge bg-info text-dark">Cheaper flight</span>
-                {% endif %}
+
+                {% for itinerary in container.itineraries_set.all %}
+                <div class="card-body">
+                    <p><strong>{{itinerary.priced_itinerary.priced_itinerary|upper}}</strong></p>
+                    <p><strong>TOTAL FLIGHT TIME: <span class="text-primary">{{itinerary.total_flight_time}} min</span></strong></p>
+                </div>
+
+                {% for flight in itinerary.flights_set.all %}
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <p><strong>{% if flight.direct_flight %}DIRECT FLIGHT{% elif not flight.direct_flight %}FLIGHT {{flight.flight_part}}{% endif %} — FROM {{flight.source.city}} TO {{flight.destination.city}}</strong></p>
+                        <p>FLIGHT NO.: {{flight.flight_num}} {{flight.carrier.carrier}} (Class {{flight.class_field.class_field}})</p>
+                        <p>ARRIVAL TIME: {{flight.arrival_time}}</p>
+                        <p>DEPARTURE TIME: {{flight.departure_time}}</p>
+                        <p>FLIGHT TIME: {{flight.flight_time}} min</p>
+                    </li>
+                </ul>
                 {% endfor %}
-            </div>
-            {% endif %}
+                {% endfor %}
 
-            <div class="card-body">
-                <p><strong>{{ff.grouper.priced_itinerary.priced_itinerary|upper}}</strong></p>
-                <p><strong>TOTAL FLIGHT TIME: {{ff.grouper.total_flight_time}} min</strong></p>
+                <div class="card-footer">
+                    <p><strong>TOTAL PRICE: <span class="text-primary">{{container.currency.currency}} {{container.adult_price}}</span></strong></p>
+                    <p>REQUEST TIME: {{container.request_time}}</p>
+                </div>
             </div>
-
-            {% for f in ff.list|dictsort:"flight_part" %}
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <p class="text-primary"><strong>{% if f.direct_flight %}DIRECT {% elif not f.direct_flight %}PART {{f.flight_part}} {% endif %} FLIGHT — FROM {{f.source.city}} TO {{f.destination.city}}</strong></p>
-                    <p>FLIGHT NO.: {{f.flight_num}} {{f.carrier.carrier}} (Class {{f.class_field.class_field}})</p>
-                    <p>DEPARTURE TIME: {{f.departure_time}}</p>
-                    <p>ARRIVAL TIME: {{f.arrival_time}}</p>
-                    <p>FLIGHT TIME: {{f.flight_time}} min</p>
-                </li>
-            </ul>
-            {% endfor %}
-            {% endfor %}
-
-            <div class="card-footer">
-                <p><strong>TOTAL PRICE: {{f_items.grouper.currency.currency}} {{f_items.grouper.adult_price}}</strong></p>
-                <p>REQUEST TIME: {{f_items.grouper.request_time}}</p>
-            </div>
-        </div>
         {% endfor %}
+
     </div>
     {% include 'pagination.html' with queryset=queryset custom_range=custom_range %}
 </main>

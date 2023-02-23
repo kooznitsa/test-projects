@@ -5,35 +5,35 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpRequest
 from django.db.models.query import QuerySet
 
-from .models import Flights
+from .models import Flights, Containers
 
 
 SORT_OPTIONS = {
     'price_asc': {
         'view': 'price ↑',
-        'key': 'itinerary_count__container_count__adult_price'
+        'key': 'itineraries__flights__itinerary_count__container_count__adult_price'
     },
     'price_desc': {
         'view': 'price ↓',
-        'key': '-itinerary_count__container_count__adult_price'
+        'key': '-itineraries__flights__itinerary_count__container_count__adult_price'
     },
     'flight_time_asc': {
         'view': 'flight time ↑',
-        'key': 'itinerary_count__total_flight_time'
+        'key': 'itineraries__flights__itinerary_count__total_flight_time'
     },
     'flight_time_desc': {
         'view': 'flight time ↓',
-        'key': '-itinerary_count__total_flight_time'
+        'key': '-itineraries__flights__itinerary_count__total_flight_time'
     },
 }
 
 DEFAULT_SORT = 'price_asc'
-PAGES_NUM = 12
+PAGES_NUM = 6
 
 
 def paginate_flights(request: HttpRequest, 
-                    flights: QuerySet[Flights], 
-                    results: QuerySet) -> tuple[QuerySet[Flights], Iterable]:
+                    flights: QuerySet[Containers], 
+                    results: QuerySet) -> tuple[QuerySet[Containers], Iterable]:
     page = request.GET.get('page')
     paginator = Paginator(flights, results)
 

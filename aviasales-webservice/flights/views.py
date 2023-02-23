@@ -3,24 +3,23 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 
-from .models import Flights
+from .models import Containers
 from .utils import paginate_flights, get_stats, SORT_OPTIONS, DEFAULT_SORT, PAGES_NUM
 
 
 def flights(request: HttpRequest) -> HttpResponse:
+    all_flights = Containers.objects.distinct()
     if onward_only := request.GET.get('onward_only'):
-        all_flights = Flights.objects.filter(itinerary_count__priced_itinerary=onward_only)
-    else:
-        all_flights = Flights.objects.all()
+        all_flights = all_flights.filter(itineraries__flights__itinerary_count__priced_itinerary=onward_only)
 
     sort = request.GET.get('sort', DEFAULT_SORT)
-    flights = all_flights.order_by(SORT_OPTIONS[sort]['key'], 'itinerary_count')
+    containers = all_flights.order_by(SORT_OPTIONS[sort]['key'])
 
-    flights, custom_range = paginate_flights(request, flights, PAGES_NUM)
+    containers, custom_range = paginate_flights(request, containers, PAGES_NUM)
 
     context = {
+        'containers': containers,
         'sort_options': SORT_OPTIONS,
-        'flights': flights,
         'custom_range': custom_range,
     }
 
@@ -33,16 +32,16 @@ def best_options(request: HttpRequest) -> HttpResponse:
     - total adult price less than SGD 450 or
     - total flight time less than 550 min
     """
-    flights = Flights.objects.filter(itinerary_count__priced_itinerary=1).order_by('itinerary_count')
 
     MAX_PRICE = 450
     MAX_FLIGHT_TIME = 550
 
-    best_options = flights.filter(
-        Q(direct_flight=True)
-        | Q(itinerary_count__container_count__adult_price__lte=MAX_PRICE)
-        | Q(itinerary_count__total_flight_time__lte=550)
-    )
+    best_options = Containers.objects.filter(
+        Q(itineraries__flights__itinerary_count__priced_itinerary=1)
+        & (Q(itineraries__flights__direct_flight=True)
+        | Q(itineraries__flights__itinerary_count__container_count__adult_price__lte=MAX_PRICE)
+        | Q(itineraries__flights__itinerary_count__total_flight_time__lte=MAX_FLIGHT_TIME))
+    ).distinct()
 
     best_options, custom_range = paginate_flights(request, best_options, PAGES_NUM)
 
