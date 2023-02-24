@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Iterable
 from django.db.models import Avg, Count, Q
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpRequest
 from django.db.models.query import QuerySet
 
@@ -11,11 +10,11 @@ from .models import Flights, Containers
 SORT_OPTIONS = {
     'price_asc': {
         'view': 'price ↑',
-        'key': 'itineraries__flights__itinerary_count__container_count__adult_price'
+        'key': 'adult_price'
     },
     'price_desc': {
         'view': 'price ↓',
-        'key': '-itineraries__flights__itinerary_count__container_count__adult_price'
+        'key': '-adult_price'
     },
     'flight_time_asc': {
         'view': 'flight time ↑',
@@ -28,35 +27,22 @@ SORT_OPTIONS = {
 }
 
 DEFAULT_SORT = 'price_asc'
-PAGES_NUM = 6
+PER_PAGE = 3
 
 
-def paginate_flights(request: HttpRequest, 
-                    flights: QuerySet[Containers], 
-                    results: QuerySet) -> tuple[QuerySet[Containers], Iterable]:
-    page = request.GET.get('page')
-    paginator = Paginator(flights, results)
+def paginate_objects(request: HttpRequest, 
+                    objects: QuerySet[Containers], 
+                    per_page: int) -> QuerySet[Containers]:
+    page = int(request.GET.get('page', 1))
+    paginator = Paginator(objects, per_page)
 
     try:
-        flights = paginator.page(page)
-    except PageNotAnInteger:
-        page = 1
-        flights = paginator.page(page)
+        objects = paginator.page(page)
     except EmptyPage:
         page = paginator.num_pages
-        flights = paginator.page(page)
+        objects = paginator.page(page)
 
-    left_index = (int(page) - 4)
-    if left_index < 1:
-        left_index = 1
-
-    right_index = (int(page) + 5)
-    if right_index > paginator.num_pages:
-        right_index = paginator.num_pages + 1
-
-    custom_range = range(left_index, right_index)
-    
-    return flights, custom_range
+    return objects
 
 
 def get_stats(date: datetime) -> tuple[int, int, float, float]:

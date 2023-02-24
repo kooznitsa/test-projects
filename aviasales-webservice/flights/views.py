@@ -4,24 +4,37 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 
 from .models import Containers
-from .utils import paginate_flights, get_stats, SORT_OPTIONS, DEFAULT_SORT, PAGES_NUM
+from .utils import paginate_objects, get_stats, SORT_OPTIONS, DEFAULT_SORT, PER_PAGE
+
+
+def is_ajax(request):
+    """
+    This utility function is used, as `request.is_ajax()` is deprecated.
+
+    This implements the previous functionality. Note that you need to
+    attach this header manually if using fetch.
+    """
+    return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 
 
 def flights(request: HttpRequest) -> HttpResponse:
     all_flights = Containers.objects.distinct()
     if onward_only := request.GET.get('onward_only'):
-        all_flights = all_flights.filter(itineraries__flights__itinerary_count__priced_itinerary=onward_only)
+        all_flights = all_flights.filter(
+            itineraries__flights__itinerary_count__priced_itinerary=onward_only)
 
     sort = request.GET.get('sort', DEFAULT_SORT)
-    containers = all_flights.order_by(SORT_OPTIONS[sort]['key'])
-
-    containers, custom_range = paginate_flights(request, containers, PAGES_NUM)
+    containers = all_flights.order_by(SORT_OPTIONS[sort]['key'], 'id')
+    containers = paginate_objects(request, containers, PER_PAGE)
 
     context = {
         'containers': containers,
         'sort_options': SORT_OPTIONS,
-        'custom_range': custom_range,
     }
+
+    if is_ajax(request):
+        context['queryset'] = containers
+        return render(request, 'flights/flight_card.html', context)
 
     return render(request, 'flights/flights.html', context)
 
@@ -39,18 +52,21 @@ def best_options(request: HttpRequest) -> HttpResponse:
     best_options = Containers.objects.filter(
         Q(itineraries__flights__itinerary_count__priced_itinerary=1)
         & (Q(itineraries__flights__direct_flight=True)
-        | Q(itineraries__flights__itinerary_count__container_count__adult_price__lte=MAX_PRICE)
+        | Q(adult_price__lte=MAX_PRICE)
         | Q(itineraries__flights__itinerary_count__total_flight_time__lte=MAX_FLIGHT_TIME))
     ).distinct()
 
-    best_options, custom_range = paginate_flights(request, best_options, PAGES_NUM)
+    best_options = paginate_objects(request, best_options, PER_PAGE)
 
     context = {
         'best_options': best_options,
-        'custom_range': custom_range,
         'max_price': MAX_PRICE,
         'max_flight_time': MAX_FLIGHT_TIME,
     }
+
+    if is_ajax(request):
+        context['queryset'] = best_options
+        return render(request, 'flights/flight_card.html', context)
 
     return render(request, 'flights/best_options.html', context)
 
