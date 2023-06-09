@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  fastapi_service:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    hostname: fastapi_service
+    container_name: fastapi_service
+    restart: always
+    depends_on:
+      - db_postgres
+    ports:
+      - '5555.5000'
+    environment:
+      POSTGRES_HOST: db_postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PORT: '5432'
+      POSTGRES_PASSWORD: PG2188code$
+      POSTGRES_DB: mailing_db 
+    volumes:
+      - ./:/home/app
+    networks:
+      - my-net
+
+  db_postgres:
+    image: postgres:15
+    hostname: db_postgres
+    container_name: db_postgres
+    restart: on-failure
+    environment:
+      TITLE: Local Mailing Service 
+      DESCRIPTION: Mailing Service
+      OPENAPI_PREFIX: '' 
+      DEBUG: True
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PG2188code$
+      POSTGRES_SERVER: postgres 
+      POSTGRES_PORT: '5432' 
+      POSTGRES_DB: mailing_db
+    ports:
+      - '5432.5432'
+    volumes:
+      - db-postgres:/var/lib/postgresql/data
+      - ./scripts/create_databases.sql:/docker-entrypoint-initdb.d/create_databases.sql
+    networks:
+      - my-net
+
+volumes:
+  db-postgres:
+    driver: local
+
+networks:
+  my-net:
+    external: true
