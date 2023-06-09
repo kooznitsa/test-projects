@@ -1,8 +1,8 @@
 from fastapi import FastAPI, status
 
 from api.routers import customers
-from database.config import settings
-from database.create_database import create_database
+from db.config import settings
+from db.create_database import create_database
 
 app = FastAPI(
     title=settings.title,
@@ -23,4 +23,4 @@ async def root():
 
 @app.get('/init_tables', status_code=status.HTTP_200_OK, name='init_tables')
 async def init_tables():
-    create_database()
+    await create_database()

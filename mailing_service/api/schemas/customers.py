@@ -1,7 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
 
-from schemas.tags import Tag, TagOutput
-
 
 class TimezoneInput(SQLModel):
     timezone: str
@@ -44,7 +42,7 @@ class CustomerInput(SQLModel):
 
 class CustomerOutput(CustomerInput):
     id: int
-    tags: list[TagOutput] = []
+    tags: list['TagOutput'] = []
 
 
 class Customer(CustomerInput, table=True):
@@ -52,4 +50,4 @@ class Customer(CustomerInput, table=True):
     phone_code_id: int = Field(foreign_key='phone_code.id')
     timezone_id: int = Field(default=None, foreign_key='timezone.id')
 
-    tags: list[Tag] = Relationship(back_populates='customers', link_model=CustomerTag)
+    tags: list['Tag'] = Relationship(back_populates='customers', link_model=CustomerTag)

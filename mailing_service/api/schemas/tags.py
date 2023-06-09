@@ -1,8 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 
-from schemas.customers import Customer, CustomerTag
-from schemas.mailouts import Mailout, MailoutTag
-
+from api.schemas.customers import CustomerTag
+from api.schemas.mailouts import MailoutTag
 
 
 class TagInput(SQLModel):
@@ -16,5 +15,5 @@ class TagOutput(TagInput):
 class Tag(TagInput, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    customers: list[Customer] = Relationship(back_populates='tags', link_model=CustomerTag)
-    mailouts: list[Mailout] = Relationship(back_populates='tags', link_model=MailoutTag)
+    customers: list['Customer'] = Relationship(back_populates='tags', link_model=CustomerTag)
+    mailouts: list['Mailout'] = Relationship(back_populates='tags', link_model=MailoutTag)

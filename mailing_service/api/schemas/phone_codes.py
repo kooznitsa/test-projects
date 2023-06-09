@@ -1,7 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 
-from schemas.customers import Customer
-from schemas.mailouts import Mailout, MailoutPhoneCode
+from api.schemas.mailouts import MailoutPhoneCode
 
 
 class PhoneCodeInput(SQLModel):
@@ -15,5 +14,5 @@ class PhoneCodeOutput(PhoneCodeInput):
 class PhoneCode(PhoneCodeInput, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    customer: Customer | None = Relationship(back_populates='phone_code')
-    mailouts: list[Mailout] = Relationship(back_populates='phone_codes', link_model=MailoutPhoneCode)
+    customer: 'Customer' | None = Relationship(back_populates='phone_code')
+    mailouts: list['Mailout'] = Relationship(back_populates='phone_codes', link_model=MailoutPhoneCode)

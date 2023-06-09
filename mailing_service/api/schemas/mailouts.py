@@ -2,11 +2,6 @@ from datetime import datetime, time
 
 from sqlmodel import SQLModel, Field, Relationship
 
-from schemas.customers import Customer, CustomerOutput
-from schemas.messages import Message, MessageOutput
-from schemas.phone_codes import PhoneCode, PhoneCodeOutput
-from schemas.tags import Tag, TagOutput
-
 
 class MailoutTag(SQLModel, table=True):
     id: int | None = Field(primary_key=True, default=None)
@@ -47,16 +42,16 @@ class MailoutInput(SQLModel):
 
 class MailoutOutput(MailoutInput):
     id: int
-    customers: list[CustomerOutput] = []
-    messages: list[MessageOutput] = []
-    phones_codes: list[PhoneCodeOutput] = []
-    tags: list[TagOutput] = []
+    customers: list['CustomerOutput'] = []
+    messages: list['MessageOutput'] = []
+    phones_codes: list['PhoneCodeOutput'] = []
+    tags: list['TagOutput'] = []
 
 
 class Mailout(MailoutInput, table=True):
     id: int | None = Field(primary_key=True, default=None)
     
-    customers: list[Customer] = Relationship(back_populates='mailouts', link_model=MailoutCustomer)
-    messages: list[Message] = Relationship(back_populates='mailout')
-    phone_codes: list[PhoneCode] = Relationship(back_populates='mailouts', link_model=MailoutPhoneCode)
-    tags: list[Tag] = Relationship(back_populates='mailouts', link_model=MailoutTag)
+    customers: list['Customer'] = Relationship(back_populates='mailouts', link_model=MailoutCustomer)
+    messages: list['Message'] = Relationship(back_populates='mailout')
+    phone_codes: list['PhoneCode'] = Relationship(back_populates='mailouts', link_model=MailoutPhoneCode)
+    tags: list['Tag'] = Relationship(back_populates='mailouts', link_model=MailoutTag)

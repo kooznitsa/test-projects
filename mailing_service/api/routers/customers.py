@@ -2,11 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from database.sessions import async_engine, get_async_session
-from schemas import (
-    Customer, CustomerInput, CustomerOutput,
-    Tag, TagInput
-)
+from db.sessions import async_engine, get_async_session
+from api.schemas.customers import Customer, CustomerInput, CustomerOutput
+from api.schemas.tags import Tag, TagInput
 
 router = APIRouter(prefix='/api/customers')
 
