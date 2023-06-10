@@ -14,5 +14,5 @@ class PhoneCodeOutput(PhoneCodeInput):
 class PhoneCode(PhoneCodeInput, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    customer: 'Customer' | None = Relationship(back_populates='phone_code')
-    mailouts: list['Mailout'] = Relationship(back_populates='phone_codes', link_model=MailoutPhoneCode)
+    customer: 'CustomerOutput' | None = Relationship(back_populates='phone_code')
+    mailouts: list = Relationship(back_populates='phone_codes', link_model=MailoutPhoneCode)

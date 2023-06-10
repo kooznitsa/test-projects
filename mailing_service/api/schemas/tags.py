@@ -15,5 +15,5 @@ class TagOutput(TagInput):
 class Tag(TagInput, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    customers: list['Customer'] = Relationship(back_populates='tags', link_model=CustomerTag)
-    mailouts: list['Mailout'] = Relationship(back_populates='tags', link_model=MailoutTag)
+    customers: list = Relationship(back_populates='tags', link_model=CustomerTag)
+    mailouts: list = Relationship(back_populates='tags', link_model=MailoutTag)

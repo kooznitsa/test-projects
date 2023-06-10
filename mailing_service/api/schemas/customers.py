@@ -11,8 +11,7 @@ class TimezoneOutput(TimezoneInput):
 
 class Timezone(TimezoneInput, table=True):
     id: int | None = Field(default=None, primary_key=True)
-
-    customer: str = Relationship(back_populates='timezone')
+    customer: 'CustomerOutput' = Relationship(back_populates='timezone')
 
 
 class CustomerTag(SQLModel, table=True):
@@ -27,8 +26,6 @@ class CustomerTag(SQLModel, table=True):
 
 class CustomerInput(SQLModel):
     phone: str
-    phone_code: int
-    timezone: str | None = 'Europe/Moscow'
 
     class Config:
         schema_extra = {
@@ -41,13 +38,19 @@ class CustomerInput(SQLModel):
 
 
 class CustomerOutput(CustomerInput):
+    """tags: list['Tag'] = []
+    -> TypeError: issubclass() arg 1 must be a class
+    The issue is the self-reference(children: List[CategoryModel]).
+    Using just list or List[Any] avoids the error.
+    """
     id: int
-    tags: list['TagOutput'] = []
+    phone_code: int
+    timezone: str | None = 'Europe/Moscow'
+    tags: list = []
 
 
 class Customer(CustomerInput, table=True):
     id: int | None = Field(primary_key=True, default=None)
     phone_code_id: int = Field(foreign_key='phone_code.id')
     timezone_id: int = Field(default=None, foreign_key='timezone.id')
-
-    tags: list['Tag'] = Relationship(back_populates='customers', link_model=CustomerTag)
+    tags: list = Relationship(back_populates='customers', link_model=CustomerTag)

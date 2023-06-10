@@ -42,16 +42,15 @@ class MailoutInput(SQLModel):
 
 class MailoutOutput(MailoutInput):
     id: int
-    customers: list['CustomerOutput'] = []
-    messages: list['MessageOutput'] = []
-    phones_codes: list['PhoneCodeOutput'] = []
-    tags: list['TagOutput'] = []
+    customers: list = []
+    messages: list = []
+    phones_codes: list = []
+    tags: list = []
 
 
 class Mailout(MailoutInput, table=True):
     id: int | None = Field(primary_key=True, default=None)
-    
-    customers: list['Customer'] = Relationship(back_populates='mailouts', link_model=MailoutCustomer)
-    messages: list['Message'] = Relationship(back_populates='mailout')
-    phone_codes: list['PhoneCode'] = Relationship(back_populates='mailouts', link_model=MailoutPhoneCode)
-    tags: list['Tag'] = Relationship(back_populates='mailouts', link_model=MailoutTag)
+    customers: list = Relationship(back_populates='mailouts', link_model=MailoutCustomer)
+    messages: list = Relationship(back_populates='mailout')
+    phone_codes: list = Relationship(back_populates='mailouts', link_model=MailoutPhoneCode)
+    tags: list = Relationship(back_populates='mailouts', link_model=MailoutTag)

@@ -6,7 +6,7 @@ from db.sessions import async_engine, get_async_session
 from api.schemas.customers import Customer, CustomerInput, CustomerOutput
 from api.schemas.tags import Tag, TagInput
 
-router = APIRouter(prefix='/api/customers')
+router = APIRouter(prefix='/customers')
 
 
 @router.get('/')
@@ -85,21 +85,6 @@ async def change_customer(
             detail=f'No customer with ID {id} is found.'
         )
     
-
-# @router.get('/tags/{tag}')
-# async def get_customers_by_tag(tag: str):
-#     """http://127.0.0.1:8000/api/customers/tags/Female"""
-#     if result := [
-#         customer for customer in customers_db 
-#         if any(i.tag == tag for i in customer.tags)
-#     ]:
-#         return result
-#     else:
-#         raise HTTPException(
-#             status_code=404, 
-#             detail=f'No customers with tag {tag} are found.'
-#         )
-
 
 @router.post('/{customer_id}/tags', response_model=Tag)
 async def add_tag(

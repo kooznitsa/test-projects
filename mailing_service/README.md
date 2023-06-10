@@ -140,10 +140,13 @@ Create our Network so that Docker Compose can work:
 docker network create my-net
 ```
 
-Start the project:
+Start the containers:
 ```
-docker compose up --build
+docker-compose up -d --build
 ```
+
+Stop the containers:
+```docker-compose down```
 
 Check PostgreSQL to see the table:
 ```

@@ -14,7 +14,7 @@ class StatusOutput(StatusInput):
 
 class Status(StatusInput, table=True):
     id: int | None = Field(primary_key=True, default=None)
-    status: str = Relationship(back_populates='message')
+    message: 'Message' = Relationship(back_populates='status')
 
 
 class MessageInput(SQLModel):
