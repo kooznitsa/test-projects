@@ -3,13 +3,12 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.sessions import async_engine, get_async_session
-from api.schemas.customers import Customer, CustomerInput, CustomerOutput
-from api.schemas.tags import Tag, TagInput
+from api.schemas.schemas import Customer, CustomerInput, CustomerOutput, Tag, TagInput
 
 router = APIRouter(prefix='/customers')
 
 
-@router.get('/')
+@router.get('/', response_model=CustomerOutput)
 async def get_customers(
     tag: str | None = None, 
     phone_code: int | None = None,
@@ -21,7 +20,8 @@ async def get_customers(
         query = query.where(any(i.tag == tag for i in Customer.tags))
     if phone_code:
         query = query.where(Customer.phone_code == phone_code)
-    return await session.exec(query).all()
+    # return await session.exec(query).all()
+    return await session.exec(query)
 
 
 @router.get('/{id}', response_model=CustomerOutput)

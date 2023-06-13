@@ -1,6 +1,7 @@
 from typing import Generator
 
-from sqlalchemy.ext.asyncio import create_async_engine
+from asyncio import current_task
+from sqlalchemy.ext.asyncio import create_async_engine, async_scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -18,8 +19,12 @@ async_engine = create_async_engine(
     future=True,
 )
 
-async_session = sessionmaker(
-    bind=async_engine, class_=AsyncSession, expire_on_commit=False
+async_session = async_scoped_session(
+    sessionmaker(
+        async_engine,
+        class_=AsyncSession,
+    ),
+    scopefunc=current_task,
 )
 
 
@@ -28,11 +33,6 @@ def get_session() -> Generator:
         yield session
 
 
-def get_async_session() -> Generator:
-    with AsyncSession(engine) as async_session:
-        yield async_session
-
-
-def create_tables_from_models():
-    SQLModel.metadata.drop_all(engine)
-    SQLModel.metadata.create_all(engine)
+async def get_async_session() -> Generator:
+    async with AsyncSession(async_engine) as session:
+        yield session

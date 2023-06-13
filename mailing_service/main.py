@@ -1,8 +1,9 @@
 from fastapi import FastAPI, status
+from sqlmodel import SQLModel
 
 from api.routers import customers
 from db.config import settings
-from db.sessions import create_tables_from_models
+from db.sessions import engine
 
 app = FastAPI(
     title=settings.title,
@@ -16,12 +17,16 @@ app = FastAPI(
 app.include_router(customers.router, prefix=settings.api_prefix)
 
 
-# @app.get('/init_tables', status_code=status.HTTP_200_OK, name='init_tables')
 @app.on_event('startup')
-async def init_tables():
-    await create_tables_from_models()
+def init_tables():
+    # SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.create_all(engine)
 
 
 @app.get('/')
 async def root():
     return {'Say': 'Hello!'}
+
+
+if __name__ == '__main__':
+    init_tables()

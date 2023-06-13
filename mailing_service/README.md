@@ -148,7 +148,11 @@ docker-compose up -d --build
 Stop the containers:
 ```docker-compose down```
 
-Check PostgreSQL to see the table:
+See relations in the database mailing_db:
 ```
 docker exec -it db_postgres psql -U postgres
+\dn                                           # list namespaces
+set search_path to pg_database_owner,public;
+\c mailing_db
+\dt
 ```
