@@ -1,27 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import select
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from db.sessions import async_engine, get_async_session
-from api.schemas.schemas import Customer, CustomerInput, CustomerOutput, Tag, TagInput
+from db.repositories.customers import CustomerRepository
+from db.sessions import async_engine, get_async_session, get_repository
+from api.schemas.tags import Tag, TagInput
+from api.schemas.customers import Customer, CustomerInput, CustomerOutput
 
 router = APIRouter(prefix='/customers')
 
 
-@router.get('/', response_model=CustomerOutput)
+# @router.get('/')
+# async def get_customers(
+#     tag: str | None = None,
+#     phone_code: int | None = None,
+#     session: AsyncSession = Depends(get_async_session)
+# ) -> list:
+#     """http://127.0.0.1:8000/api/customers?tag=Student&phone_code=936"""
+#     query = select(Customer)
+#     if tag:
+#         query = query.where(any(i.tag == tag for i in Customer.tags))
+#     if phone_code:
+#         query = query.where(Customer.phone_code == phone_code)
+#     # return session.exec(query).all() # if synchronous
+#     results = await session.execute(query)
+#     return results.scalars().all()
+
+@router.get(
+    '/',
+    response_model=list[Optional[CustomerOutput]],
+    status_code=status.HTTP_200_OK,
+    name='get_customers',
+)
 async def get_customers(
-    tag: str | None = None, 
-    phone_code: int | None = None,
-    session: AsyncSession = Depends(get_async_session)
-) -> list:
-    """http://127.0.0.1:8000/api/customers?tag=Student&phone_code=936"""
-    query = select(Customer)
-    if tag:
-        query = query.where(any(i.tag == tag for i in Customer.tags))
-    if phone_code:
-        query = query.where(Customer.phone_code == phone_code)
-    # return await session.exec(query).all()
-    return await session.exec(query)
+    tag: str | None = Query(default=None),
+    phone_code: int | None = Query(default=None),
+    limit: int = Query(default=10, lte=100),
+    offset: int = Query(default=0),
+    repository: CustomerRepository = Depends(get_repository(CustomerRepository))
+) -> list[Optional[CustomerOutput]]:
+    return await repository.list(
+        tag=tag,
+        phone_code=phone_code,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get('/{id}', response_model=CustomerOutput)
@@ -32,6 +56,9 @@ async def get_customer_by_id(
     """http://127.0.0.1:8000/api/customers/2
     Path parameters cannot be optional arguments.
     You need to handle absent values in code.
+
+    sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called;
+    can't call await_only() here. Was IO attempted in an unexpected place?
     """
     if customer := await session.get(Customer, id):
         return customer
@@ -50,7 +77,7 @@ async def add_customer(customer_input: CustomerInput) -> Customer:
         await session.commit()
         await session.refresh(new_customer)
         return new_customer
-    
+
 
 @router.delete('/{id}', status_code=204)
 async def remove_customer(
@@ -87,8 +114,8 @@ async def change_customer(
     
 
 @router.post('/{customer_id}/tags', response_model=Tag)
-async def add_tag(
-    customer_id: int, 
+async def add_customer_tag(
+    customer_id: int,
     tag_input: TagInput,
     session: AsyncSession = Depends(get_async_session)
 ) -> Tag:
@@ -100,6 +127,6 @@ async def add_tag(
         return new_tag
     else:
         raise HTTPException(
-            status_code=404, 
+            status_code=404,
             detail=f'No customer with ID {customer_id} is found.'
         )

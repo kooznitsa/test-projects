@@ -1,6 +1,7 @@
 from typing import Generator
 
 from asyncio import current_task
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, async_scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import Session, SQLModel, create_engine
@@ -36,3 +37,15 @@ def get_session() -> Generator:
 async def get_async_session() -> Generator:
     async with AsyncSession(async_engine) as session:
         yield session
+
+
+async def get_db() -> AsyncSession:
+    async with async_session() as session:
+        yield session
+        await session.commit()
+
+
+def get_repository(repository):
+    def _get_repository(session: AsyncSession = Depends(get_db)):
+        return repository(session)
+    return _get_repository
