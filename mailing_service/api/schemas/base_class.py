@@ -5,13 +5,14 @@ from sqlmodel import Field, SQLModel
 
 
 class StatusEnum(str, Enum):
-    active: 'active'
-    inactive: 'inactive'
-    deleted: 'deleted'
+    created = 'created'
+    sent = 'sent'
+    updated = 'updated'
+    deleted = 'deleted'
 
 
 class TimeStampModel(SQLModel):
-    created_date: datetime = Field(
+    created_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
         sa_column_kwargs={'server_default': text('current_timestamp(0)')},

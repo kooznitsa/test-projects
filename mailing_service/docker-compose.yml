@@ -3,7 +3,7 @@ version: '3.9'
 services:
   fastapi_service:
     build:
-      context: ./
+      context: ./api
       dockerfile: Dockerfile
     hostname: fastapi_service
     container_name: fastapi_service
@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/home/app
+      - ./api:/home/app
     networks:
       - my-net
 
@@ -23,9 +23,8 @@ services:
     hostname: db_postgres
     container_name: db_postgres
     restart: on-failure
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    env_file:
+      - .env
     ports:
       - '5432:5432'
     volumes:

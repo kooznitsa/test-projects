@@ -1,10 +1,10 @@
 from fastapi import FastAPI, status
 from sqlmodel import SQLModel, Session
 
-from api.routers import customers
 from db.config import settings
 from db.sample_data import add_sample_data
 from db.sessions import engine
+from routers import customers
 
 app = FastAPI(
     title=settings.title,
@@ -19,7 +19,7 @@ app.include_router(customers.router, prefix=settings.api_prefix)
 
 
 @app.on_event('startup')
-def init_tables():
+async def init_tables():
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     add_sample_data()

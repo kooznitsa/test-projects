@@ -1,23 +1,40 @@
-from datetime import datetime
+from typing import Optional, TYPE_CHECKING
 
-from sqlalchemy import text
 from sqlmodel import SQLModel, Field, Relationship
 
-from api.schemas.base_class import TimeStampModel
+from .base_class import TimeStampModel
+
+if TYPE_CHECKING:
+    from .statuses import Status
+    from .mailouts import Mailout
 
 
-class MessageInput(SQLModel):
+class MessageBase(SQLModel):
     text_message: str
+    status_id: int | None = Field(default=1, foreign_key='statuses.id')
+    mailout_id: int | None = Field(default=None, foreign_key='mailouts.id')
+    customer_id: int | None = Field(default=None, foreign_key='customers.id')
 
 
-class MessageOutput(MessageInput):
+class Message(MessageBase, TimeStampModel, table=True):
+    __tablename__: str = 'messages'
+
+    id: int | None = Field(primary_key=True, default=None)
+
+    status: 'Status' = Relationship(back_populates='messages')
+    mailout: 'Mailout' = Relationship(back_populates='messages')
+
+
+class MessageCreate(MessageBase):
+    pass
+
+
+class MessageRead(MessageBase, TimeStampModel):
     id: int
 
 
-class Message(MessageInput, TimeStampModel, table=True):
-    __tablename__: str = 'messages'
-    id: int | None = Field(primary_key=True, default=None)
-    status_id: int = Field(foreign_key='statuses.id')
-    status: 'Status' = Relationship(back_populates='messages')
-    mailout_id: int = Field(foreign_key='mailouts.id')
-    mailout: 'Mailout' = Relationship(back_populates='messages')
+class MessageUpdate(SQLModel):
+    text_message: Optional[str]
+    status_id: int | None = None
+    mailout_id: int | None = None
+    customer_id: int | None = None

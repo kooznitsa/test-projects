@@ -1,35 +1,37 @@
 from datetime import datetime, time
+from typing import TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 
-import api.schemas as schemas
+from .link_schemas import MailoutPhoneCode, MailoutTag
+
+if TYPE_CHECKING:
+    from .phone_codes import PhoneCode, PhoneCodeRead
+    from .tags import Tag, TagRead
+    from .messages import Message
 
 
-class MailoutInput(SQLModel):
+class MailoutBase(SQLModel):
     start_time: datetime
     finish_time: datetime
     available_start: time | None = None
     available_finish: time | None = None
 
 
-class MailoutOutput(MailoutInput):
-    id: int
-    customers: list['Customer'] = []
-    messages: list['Message'] = []
-    phones_codes: list['PhoneCode'] = []
-    tags: list['Tag'] = []
-
-
-class Mailout(MailoutInput, table=True):
+class Mailout(MailoutBase, table=True):
     __tablename__: str = 'mailouts'
+
     id: int | None = Field(primary_key=True, default=None)
-    customers: list['Customer'] = Relationship(
-        back_populates='mailouts', link_model=schemas.link_schemas.MailoutCustomer
-    )
+    tags: list['Tag'] = Relationship(back_populates='mailouts', link_model=MailoutTag)
+    phone_codes: list['PhoneCode'] = Relationship(back_populates='mailouts', link_model=MailoutPhoneCode)
     messages: list['Message'] = Relationship(back_populates='mailout')
-    phone_codes: list[schemas.phone_codes.PhoneCode] = Relationship(
-        back_populates='mailouts', link_model=schemas.link_schemas.MailoutPhoneCode
-    )
-    tags: list['Tag'] = Relationship(
-        back_populates='mailouts', link_model=schemas.link_schemas.MailoutTag
-    )
+
+
+class MailoutCreate(MailoutBase):
+    pass
+
+
+class MailoutRead(MailoutBase):
+    id: int
+    phones_codes: list['PhoneCodeRead'] = []
+    tags: list['TagRead'] = []
