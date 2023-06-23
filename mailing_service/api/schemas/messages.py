@@ -2,7 +2,7 @@ from typing import Optional, TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 
-from .base_class import TimeStampModel
+from .base_classes import TimeStampModel
 
 if TYPE_CHECKING:
     from .statuses import Status

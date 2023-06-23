@@ -1,39 +1,16 @@
-from datetime import datetime, time
-import inspect as inspect_func
-
 from sqlmodel import Session
 from sqlalchemy import inspect, select, text
-from sqlalchemy.dialects.postgresql import insert
 
 from db.sessions import engine
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate
 from schemas.timezones import Timezone, TimezoneCreate
-from schemas.tags import Tag, TagCreate
+from schemas.tags import Tag, TagCreate, TagRead
 from schemas.messages import Message, MessageCreate
-from schemas.customers import Customer, CustomerCreate
+from schemas.customers import Customer, CustomerCreate, CustomerRead
 from schemas.mailouts import Mailout, MailoutCreate
 
 
-# def insert_or_update(model, entities: set):
-#     table = model.__table__
-#     primary_keys = [key.name for key in inspect(table).primary_key]
-#     stmt = (
-#         insert(table)
-#         .returning(text(primary_keys[0]))
-#         .values([e.__dict__ for e in entities])
-#     )
-#     update_dict = {c.name: c for c in stmt.excluded if not c.primary_key}
-#
-#     if not update_dict:
-#         raise ValueError(f'{inspect_func.stack()[0][3]} resulted in an empty update_dict')
-#
-#     return stmt.on_conflict_do_update(
-#         index_elements=update_dict,
-#         set_=update_dict,
-#     )
-
-# @api.post('/customers/{id}', response_model=Customer)
-def upsert_value(session, result, model_create):
+def upsert_value(session, result, model_from_orm):
     """Upsert a value.
 
     It is used to create a value in the database if it does not already exist,
@@ -44,23 +21,19 @@ def upsert_value(session, result, model_create):
         with Session(engine) as session: ...
       result:
         The model data.
-      model_create:
-        The model input data.
+      model_from_orm:
+        The model from_orm(model_create) data.
 
     Returns:
       The upserted model.
     """
 
-    # check if the device exists
-    # statement = select(model).where(model.dict[column] == value)
-    # result = await session.exec(statement).first()
-
-    # if not, create it
+    # if the entity does not exist, create it
     if result is None:
-        result = model_create
+        result = model_from_orm
 
     # sync the data
-    for k, v in model_create.dict(exclude_unset=True).items():
+    for k, v in model_from_orm.dict(exclude_unset=True).items():
         setattr(result, k, v)
 
     # persist the data to the database
@@ -113,6 +86,7 @@ def add_sample_data():
         print(timezone)
 
         tag1 = upsert_tag(session, 'Woman')
+        tag2 = upsert_tag(session, 'Unemployed')
         print(tag1)
 
         customer1 = Customer.from_orm(
@@ -122,37 +96,16 @@ def add_sample_data():
                 'timezone_id': timezone.id,
             }
         )
-        customer1.tags.append(tag1)
+
+        print(customer1.tags)
+
+        customer1.tags.extend([tag1, tag2])
 
         session.add(customer1)
         session.commit()
         session.refresh(customer1)
 
-        print(customer1)
-        print(customer1.tags)
-        # phone_code2 = await upsert_value(session, PhoneCode, PhoneCodeInput, 'phone_code', 935)
-        #
-        # # timezone = TimezoneInput(timezone='Europe/Moscow')
-        # timezone = await upsert_value(session, Timezone, TimezoneInput, 'timezone', 'Europe/Moscow')
-        #
-        # # ctag1 = TagInput(tag='Female')
-        # # ctag2 = TagInput(tag='Mother')
-        # # ctag3 = TagInput(tag='Worker')
-        # # ctag4 = TagInput(tag='Male')
-        # # ctag5 = TagInput(tag='Student')
-        # ctag1 = await upsert_value(session, Tag, TagInput, 'tag', 'Female')
-        # ctag2 = await upsert_value(session, Tag, TagInput, 'tag', 'Mother')
-        # ctag3 = await upsert_value(session, Tag, TagInput, 'tag', 'Worker')
-        # ctag4 = await upsert_value(session, Tag, TagInput, 'tag', 'Male')
-        # ctag5 = await upsert_value(session, Tag, TagInput, 'tag', 'Student')
-        #
-        # # mtag1 = TagInput(tag='Female')
-        # # mtag2 = TagInput(tag='Male')
-        # # mtag3 = TagInput(tag='Student')
-        # mtag1 = await upsert_value(session, Tag, TagInput, 'tag', 'Female')
-        # mtag2 = await upsert_value(session, Tag, TagInput, 'tag', 'Male')
-        # mtag3 = await upsert_value(session, Tag, TagInput, 'tag', 'Student')
-        #
+
         # # message1 = MessageInput(text_message='Test message 1')
         # # message2 = MessageInput(text_message='Test message 2')
         # message1 = await upsert_value(session, Message, MessageInput, 'text_message', 'Test message 1')

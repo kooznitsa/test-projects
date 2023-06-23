@@ -2,8 +2,8 @@ from typing import Optional, TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 
-from .link_schemas import CustomerTag
 from .tags import TagRead
+from .link_schemas import CustomerTag
 
 if TYPE_CHECKING:
     from .phone_codes import PhoneCode
@@ -42,7 +42,7 @@ class CustomerCreate(CustomerBase):
 
 class CustomerRead(CustomerBase):
     id: int
-    tags: list['TagRead'] = []
+    tags: list[TagRead] = []
 
 
 class CustomerUpdate(SQLModel):

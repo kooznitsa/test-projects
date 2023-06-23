@@ -3,7 +3,7 @@ from typing import Optional, TYPE_CHECKING
 from sqlalchemy import UniqueConstraint
 from sqlmodel import SQLModel, Field, Relationship
 
-from .base_class import StatusEnum
+from .base_classes import StatusEnum
 
 if TYPE_CHECKING:
     from .messages import Message

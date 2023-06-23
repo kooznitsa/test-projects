@@ -106,7 +106,7 @@ This API assumes authentication using JWT.
 
 ### Database structure
 
-![Schema](https://github.com/kooznitsa/test-projects/blob/main/mailing_service/db/db_schema.png)
+![Schema](https://github.com/kooznitsa/test-projects/blob/main/mailing_service/api/db/db_schema.png)
 
 ### Endpoints
 

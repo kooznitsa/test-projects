@@ -1,32 +1,33 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlmodel.ext.asyncio.session import AsyncSession
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
 from db.errors import EntityDoesNotExist
 from db.sessions import async_engine, get_async_session, get_repository
 from repositories.customers import CustomerRepository
-from schemas.tags import Tag, TagCreate
 from schemas.customers import Customer, CustomerCreate, CustomerRead
 
 router = APIRouter(prefix='/customers')
 
 
-# @router.get('/')
-# async def get_customers(
-#     tag: str | None = None,
-#     phone_code: int | None = None,
-#     session: AsyncSession = Depends(get_async_session)
-# ) -> list:
-#     """http://127.0.0.1:8000/api/customers?tag=Student&phone_code=936"""
-#     query = select(Customer)
-#     if tag:
-#         query = query.where(any(i.tag == tag for i in Customer.tags))
-#     if phone_code:
-#         query = query.where(Customer.phone_code == phone_code)
-#     # return session.exec(query).all() # if synchronous
-#     results = await session.execute(query)
-#     return results.scalars().all()
+@router.post(
+    '/',
+    response_model=CustomerRead,
+    status_code=status.HTTP_201_CREATED,
+    name='create_customer',
+)
+async def create_customer(
+    customer_create: CustomerCreate = Body(...),
+    repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+) -> CustomerRead:
+    """http://localhost:8000/api/customers"""
+    try:
+        return await repository.create(customer_create=customer_create)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code or timezone not found'
+        )
+
 
 @router.get(
     '/',
@@ -62,24 +63,14 @@ async def get_customer(
 ) -> CustomerRead:
     """http://localhost:8000/api/customers/1"""
     try:
-        await repository.get(customer_id=customer_id)
+        result = await repository.get(customer_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail='Customer not found'
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
         )
-    return await repository.get(customer_id=customer_id)
+    return result
 
 
-# @router.post('/', response_model=Customer)
-# async def add_customer(customer_input: CustomerInput) -> Customer:
-#     with AsyncSession(async_engine) as session:
-#         new_customer = await Customer.from_orm(customer_input)
-#         await session.add(new_customer)
-#         await session.commit()
-#         await session.refresh(new_customer)
-#         return new_customer
-#
-#
 # @router.delete('/{id}', status_code=204)
 # async def remove_customer(
 #     id: int,

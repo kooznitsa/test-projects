@@ -19,7 +19,7 @@ class Tag(TagBase, table=True):
     __table_args__ = (UniqueConstraint('tag'),)
 
     id: int | None = Field(default=None, primary_key=True)
-    customers: list['Customer'] = Relationship(back_populates='tags', link_model=CustomerTag)
+    customers: list['Customer'] = Relationship(back_populates='tags', link_model=CustomerTag, )
     mailouts: list['Mailout'] = Relationship(back_populates='tags', link_model=MailoutTag)
 
 

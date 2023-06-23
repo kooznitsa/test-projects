@@ -1,11 +1,14 @@
 from typing import Optional
 
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import Session, col
 
 from db.errors import EntityDoesNotExist
-from schemas.customers import Customer, CustomerRead
+from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead
+from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead
+from schemas.tags import Tag, TagCreate, TagRead
+from schemas.customers import Customer, CustomerCreate, CustomerRead
 
 
 class CustomerRepository:
@@ -17,30 +20,66 @@ class CustomerRepository:
             select(Customer)
             .where(Customer.id == customer_id)
         )
-        results = await self.session.exec(query)
-        return results.first()
+        result = await self.session.exec(
+            query.options(selectinload(Customer.tags))
+        )
+
+        return result.first()
+
+    async def create(self, customer_create: CustomerCreate) -> CustomerRead:
+        phone_code_query = await self.session.exec(
+            select(PhoneCode)
+            .where(PhoneCode.id == customer_create.phone_code_id)
+        )
+        phone_code = phone_code_query.first()
+        timezone_query = await self.session.execute(
+            select(Timezone)
+            .where(Timezone.id == customer_create.timezone_id)
+        )
+        timezone = timezone_query.first()
+
+        if not phone_code or not timezone:
+            raise EntityDoesNotExist
+        else:
+            customer = Customer.from_orm(customer_create)
+            self.session.add(customer)
+            await self.session.commit()
+            await self.session.refresh(customer)
+
+            # return customer
+
+            result = await self.session.scalars(
+                select(Customer)
+                .where(Customer.id == customer.id)
+                .options(selectinload(Customer.tags))
+            )
+            return result.first()
 
     async def list(
         self,
         tag: Optional[str] = None,
         phone_code: int | None = None,
         limit: int = 10,
-        offset: int = 0
+        offset: int = 0,
     ) -> list[CustomerRead]:
-        query = select(Customer)
+        query = select(Customer).order_by(Customer.id)
         if tag:
-            # raise NotImplementedError(str(op))
-            # 2023-06-20 16:57:57 fastapi_service  | NotImplementedError: <built-in function getitem>
-            query = query.where(any(i.tag == tag for i in Customer.tags))
+            query = query.where(Customer.tags.any(Tag.tag == tag))
         if phone_code:
-            query = query.where(Customer.phone_code == phone_code)
-        results = await self.session.exec(query.offset(offset).limit(limit))
-        return [CustomerRead(**customer.dict()) for customer in results]
+            query = (
+                query.join(PhoneCode)
+                .where(PhoneCode.id == Customer.phone_code_id)
+                .where(PhoneCode.phone_code == phone_code)
+            )
+        query = query.offset(offset).limit(limit)
+
+        results = await self.session.exec(
+            query.options(selectinload(Customer.tags))
+        )
+        return results.all()
 
     async def get(self, customer_id: int) -> Optional[CustomerRead]:
-        db_customer = await self._get_instance(customer_id)
-
-        if db_customer is None:
+        if customer := await self._get_instance(customer_id):
+            return customer
+        else:
             raise EntityDoesNotExist
-
-        return CustomerRead(**db_customer.dict())
