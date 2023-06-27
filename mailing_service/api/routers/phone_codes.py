@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import async_engine, get_async_session, get_repository
 from repositories.phone_codes import PhoneCodeRepository
-from schemas.phone_codes import PhoneCodeCreate, PhoneCodeRead
+from schemas.phone_codes import PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
 
 router = APIRouter(prefix='/phone_codes')
 
@@ -60,3 +60,43 @@ async def get_phone_code(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
         )
     return result
+
+
+@router.put(
+    '/{phone_code_id}',
+    response_model=PhoneCodeRead,
+    status_code=status.HTTP_200_OK,
+    name='update_phone_code',
+)
+async def update_phone_code(
+    phone_code_id: int,
+    phone_code_update: PhoneCodeUpdate = Body(...),
+    repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+) -> PhoneCodeRead:
+    """http://localhost:8000/api/phone_codes/1"""
+    try:
+        await repository.get(phone_code_id=phone_code_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
+        )
+    return await repository.update(phone_code_id=phone_code_id, phone_code_update=phone_code_update)
+
+
+@router.delete(
+    '/{phone_code_id}',
+    status_code=status.HTTP_200_OK,
+    name='delete_phone_code',
+)
+async def delete_phone_code(
+    phone_code_id: int,
+    repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+) -> None:
+    """http://localhost:8000/api/phone_codes/1"""
+    try:
+        await repository.get(phone_code_id=phone_code_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
+        )
+    return await repository.delete(phone_code_id=phone_code_id)

@@ -8,7 +8,7 @@ from db.errors import EntityDoesNotExist
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead
 from schemas.tags import Tag, TagCreate, TagRead
-from schemas.customers import Customer, CustomerCreate, CustomerRead
+from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
 
 
 class CustomerRepository:
@@ -16,14 +16,8 @@ class CustomerRepository:
         self.session = session
 
     async def _get_instance(self, customer_id: int):
-        query = (
-            select(Customer)
-            .where(Customer.id == customer_id)
-        )
-        result = await self.session.exec(
-            query.options(selectinload(Customer.tags))
-        )
-
+        query = select(Customer).where(Customer.id == customer_id)
+        result = await self.session.exec(query.options(selectinload(Customer.tags)))
         return result.first()
 
     async def create(self, customer_create: CustomerCreate) -> CustomerRead:
@@ -46,8 +40,6 @@ class CustomerRepository:
             await self.session.commit()
             await self.session.refresh(customer)
 
-            # return customer
-
             result = await self.session.scalars(
                 select(Customer)
                 .where(Customer.id == customer.id)
@@ -59,7 +51,7 @@ class CustomerRepository:
         self,
         tag: Optional[str] = None,
         phone_code: int | None = None,
-        limit: int = 10,
+        limit: int = 50,
         offset: int = 0,
     ) -> list[CustomerRead]:
         query = select(Customer).order_by(Customer.id)
@@ -81,5 +73,38 @@ class CustomerRepository:
     async def get(self, customer_id: int) -> Optional[CustomerRead]:
         if customer := await self._get_instance(customer_id):
             return customer
+        else:
+            raise EntityDoesNotExist
+
+    async def update(
+        self,
+        customer_id: int,
+        customer_update: CustomerUpdate,
+    ) -> Optional[CustomerRead]:
+        if customer := await self._get_instance(customer_id):
+            customer_dict = customer_update.dict(
+                exclude_unset=True,
+                exclude={'id'},
+            )
+            for key, value in customer_dict.items():
+                setattr(customer, key, value)
+
+            self.session.add(customer)
+            await self.session.commit()
+            await self.session.refresh(customer)
+
+            result = await self.session.scalars(
+                select(Customer)
+                .where(Customer.id == customer.id)
+                .options(selectinload(Customer.tags))
+            )
+            return result.first()
+        else:
+            raise EntityDoesNotExist
+
+    async def delete(self, customer_id: int) -> None:
+        if customer := await self._get_instance(customer_id):
+            await self.session.delete(customer)
+            await self.session.commit()
         else:
             raise EntityDoesNotExist

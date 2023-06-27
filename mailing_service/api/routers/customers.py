@@ -5,7 +5,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import async_engine, get_async_session, get_repository
 from repositories.customers import CustomerRepository
-from schemas.customers import Customer, CustomerCreate, CustomerRead
+from repositories.tags import TagRepository
+from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
+from schemas.tags import TagCreate, TagRead, TagUpdate
 
 router = APIRouter(prefix='/customers')
 
@@ -38,7 +40,7 @@ async def create_customer(
 async def get_customers(
     tag: str | None = Query(default=None),
     phone_code: int | None = Query(default=None),
-    limit: int = Query(default=10, lte=100),
+    limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository))
 ) -> list[Optional[CustomerRead]]:
@@ -71,54 +73,101 @@ async def get_customer(
     return result
 
 
-# @router.delete('/{id}', status_code=204)
-# async def remove_customer(
-#     id: int,
-#     session: AsyncSession = Depends(get_async_session)
-# ) -> None:
-#     if customer := await session.get(Customer, id):
-#         await session.delete(customer)
-#         await session.commit()
-#     else:
-#         raise HTTPException(
-#             status_code=404,
-#             detail=f'No customer with ID {id} is found.'
-#         )
-#
-#
-# @router.put('/{id}', response_model=Customer)
-# async def change_customer(
-#     id: int,
-#     new_data: CustomerInput,
-#     session: AsyncSession = Depends(get_async_session)
-# ) -> Customer:
-#     if customer := await session.get(Customer, id):
-#         customer.phone = new_data.phone
-#         customer.phone_code = new_data.phone_code
-#         customer.timezone = new_data.timezone
-#         await session.commit()
-#         return customer
-#     else:
-#         raise HTTPException(
-#             status_code=404,
-#             detail=f'No customer with ID {id} is found.'
-#         )
-#
-#
-# @router.post('/{customer_id}/tags', response_model=Tag)
-# async def add_customer_tag(
-#     customer_id: int,
-#     tag_input: TagInput,
-#     session: AsyncSession = Depends(get_async_session)
-# ) -> Tag:
-#     if customer := await session.get(Customer, customer_id):
-#         new_tag = Tag.from_orm(tag_input, update={'customer_id': customer_id})
-#         customer.tags.append(new_tag)
-#         await session.commit()
-#         await session.refresh(new_tag)
-#         return new_tag
-#     else:
-#         raise HTTPException(
-#             status_code=404,
-#             detail=f'No customer with ID {customer_id} is found.'
-#         )
+@router.put(
+    '/{customer_id}',
+    response_model=CustomerRead,
+    status_code=status.HTTP_200_OK,
+    name='update_customer',
+)
+async def update_customer(
+    customer_id: int,
+    customer_update: CustomerUpdate = Body(...),
+    repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+) -> CustomerRead:
+    """http://localhost:8000/api/customers/1"""
+    try:
+        await repository.get(customer_id=customer_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+        )
+    return await repository.update(customer_id=customer_id, customer_update=customer_update)
+
+
+@router.delete(
+    '/{customer_id}',
+    status_code=status.HTTP_200_OK,
+    name='delete_customer',
+)
+async def delete_customer(
+    customer_id: int,
+    repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+) -> None:
+    """http://localhost:8000/api/customers/1"""
+    try:
+        await repository.get(customer_id=customer_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+        )
+    return await repository.delete(customer_id=customer_id)
+
+
+@router.post(
+    '/{customer_id}/tags',
+    response_model=TagRead,
+    status_code=status.HTTP_201_CREATED,
+    name='create_tag',
+)
+async def create_tag(
+    customer_id: int,
+    tag_create: TagCreate = Body(...),
+    repository: TagRepository = Depends(get_repository(TagRepository)),
+) -> TagRead:
+    """http://localhost:8000/api/customers/1/tags"""
+    try:
+        return await repository.create(model_id=customer_id, tag_create=tag_create, model=Customer)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+        )
+
+
+@router.put(
+    '/{customer_id}/tags/{tag_id}',
+    response_model=TagRead,
+    status_code=status.HTTP_200_OK,
+    name='update_tag',
+)
+async def update_tag(
+    tag_id: int,
+    tag_update: TagUpdate = Body(...),
+    repository: TagRepository = Depends(get_repository(TagRepository)),
+) -> TagRead:
+    """http://localhost:8000/api/customers/1/tags/1"""
+    try:
+        await repository.get(tag_id=tag_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
+        )
+    return await repository.update(tag_id=tag_id, tag_update=tag_update)
+
+
+@router.delete(
+    '/{customer_id}/tags/{tag_id}',
+    status_code=status.HTTP_200_OK,
+    name='delete_tag',
+)
+async def delete_tag(
+    tag_id: int,
+    repository: TagRepository = Depends(get_repository(TagRepository)),
+) -> None:
+    """http://localhost:8000/api/customers/1/tags/1"""
+    try:
+        await repository.get(tag_id=tag_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
+        )
+    return await repository.delete(tag_id=tag_id)
