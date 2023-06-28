@@ -90,7 +90,10 @@ def add_sample_data():
         print(tag1)
 
         customer1 = Customer.from_orm(
-            CustomerCreate(phone='79251234567'),
+            CustomerCreate(
+                country_code=7,
+                phone=1234567,
+            ),
             update={
                 'phone_code_id': phone_code1.id,
                 'timezone_id': timezone.id,

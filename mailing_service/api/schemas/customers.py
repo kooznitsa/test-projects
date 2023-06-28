@@ -13,15 +13,17 @@ if TYPE_CHECKING:
 
 
 class CustomerBase(SQLModel):
-    phone: str
+    country_code: int = Field(default=7)
     phone_code_id: int | None = Field(default=None, foreign_key='phone_codes.id')
+    phone: int
     timezone_id: int | None = Field(default=1, foreign_key='timezones.id')
 
     class Config:
         schema_extra = {
             "example": {
-                "phone": "79251234567",
+                "country_code": 7,
                 "phone_code_id": 1,
+                "phone": "1234567",
                 "timezone_id": 1
             }
         }

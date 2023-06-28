@@ -20,11 +20,11 @@ app.include_router(timezones.router, prefix=settings.api_prefix, tags=['Timezone
 app.include_router(customers.router, prefix=settings.api_prefix, tags=['Customers'])
 
 
-# @app.on_event('startup')
-# async def init_tables():
-#     SQLModel.metadata.drop_all(engine)
-#     SQLModel.metadata.create_all(engine)
-#     add_sample_data()
+@app.on_event('startup')
+async def init_tables():
+    SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.create_all(engine)
+    add_sample_data()
 
 
 @app.get('/')
@@ -32,5 +32,5 @@ async def root():
     return {'Say': 'Hello!'}
 
 
-# if __name__ == '__main__':
-#     init_tables()
+if __name__ == '__main__':
+    init_tables()
