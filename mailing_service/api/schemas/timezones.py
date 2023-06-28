@@ -10,6 +10,13 @@ if TYPE_CHECKING:
 class TimezoneBase(SQLModel):
     timezone: str
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "timezone": "Europe/Belgrade"
+            }
+        }
+
 
 class Timezone(TimezoneBase, table=True):
     __tablename__: str = 'timezones'

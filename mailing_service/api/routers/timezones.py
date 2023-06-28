@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import async_engine, get_async_session, get_repository
 from repositories.timezones import TimezoneRepository
-from schemas.timezones import TimezoneCreate, TimezoneRead, TimezoneUpdate
+from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead, TimezoneUpdate
 
 router = APIRouter(prefix='/timezones')
 
@@ -20,8 +20,7 @@ async def create_timezone(
     timezone_create: TimezoneCreate = Body(...),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
 ) -> TimezoneRead:
-    """http://localhost:8000/api/timezones"""
-    return await repository.create(timezone_create=timezone_create)
+    return await repository.create(model_create=timezone_create)
 
 
 @router.get(
@@ -35,11 +34,7 @@ async def get_timezones(
     offset: int = Query(default=0),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository))
 ) -> list[Optional[TimezoneRead]]:
-    """http://localhost:8000/api/timezones"""
-    return await repository.list(
-        limit=limit,
-        offset=offset,
-    )
+    return await repository.list(limit=limit, offset=offset)
 
 
 @router.get(
@@ -52,9 +47,8 @@ async def get_timezone(
     timezone_id: int,
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
 ) -> TimezoneRead:
-    """http://localhost:8000/api/timezones/1"""
     try:
-        result = await repository.get(timezone_id=timezone_id)
+        result = await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
@@ -73,14 +67,13 @@ async def update_timezone(
     timezone_update: TimezoneUpdate = Body(...),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
 ) -> TimezoneRead:
-    """http://localhost:8000/api/timezones/1"""
     try:
-        await repository.get(timezone_id=timezone_id)
+        await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
         )
-    return await repository.update(timezone_id=timezone_id, timezone_update=timezone_update)
+    return await repository.update(model_id=timezone_id, model_update=timezone_update)
 
 
 @router.delete(
@@ -92,11 +85,10 @@ async def delete_timezone(
     timezone_id: int,
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
 ) -> None:
-    """http://localhost:8000/api/timezones/1"""
     try:
-        await repository.get(timezone_id=timezone_id)
+        await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
         )
-    return await repository.delete(timezone_id=timezone_id)
+    return await repository.delete(model=Timezone, model_id=timezone_id)

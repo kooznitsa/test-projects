@@ -7,7 +7,7 @@ from db.sessions import async_engine, get_async_session, get_repository
 from repositories.customers import CustomerRepository
 from repositories.tags import TagRepository
 from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
-from schemas.tags import TagCreate, TagRead, TagUpdate
+from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 
 router = APIRouter(prefix='/customers')
 
@@ -22,7 +22,6 @@ async def create_customer(
     customer_create: CustomerCreate = Body(...),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
-    """http://localhost:8000/api/customers"""
     try:
         return await repository.create(customer_create=customer_create)
     except EntityDoesNotExist:
@@ -44,7 +43,6 @@ async def get_customers(
     offset: int = Query(default=0),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository))
 ) -> list[Optional[CustomerRead]]:
-    """http://localhost:8000/api/customers/?tag=Woman&phone_code=925&limit=10&offset=0"""
     return await repository.list(
         tag=tag,
         phone_code=phone_code,
@@ -63,7 +61,6 @@ async def get_customer(
     customer_id: int,
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
-    """http://localhost:8000/api/customers/1"""
     try:
         result = await repository.get(customer_id=customer_id)
     except EntityDoesNotExist:
@@ -84,14 +81,13 @@ async def update_customer(
     customer_update: CustomerUpdate = Body(...),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
-    """http://localhost:8000/api/customers/1"""
     try:
         await repository.get(customer_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
         )
-    return await repository.update(customer_id=customer_id, customer_update=customer_update)
+    return await repository.update(model_id=customer_id, model_update=customer_update)
 
 
 @router.delete(
@@ -103,14 +99,13 @@ async def delete_customer(
     customer_id: int,
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> None:
-    """http://localhost:8000/api/customers/1"""
     try:
         await repository.get(customer_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
         )
-    return await repository.delete(customer_id=customer_id)
+    return await repository.delete(model=Customer, model_id=customer_id)
 
 
 @router.post(
@@ -124,7 +119,6 @@ async def create_tag(
     tag_create: TagCreate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> TagRead:
-    """http://localhost:8000/api/customers/1/tags"""
     try:
         return await repository.create(model_id=customer_id, tag_create=tag_create, model=Customer)
     except EntityDoesNotExist:
@@ -144,14 +138,13 @@ async def update_tag(
     tag_update: TagUpdate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> TagRead:
-    """http://localhost:8000/api/customers/1/tags/1"""
     try:
-        await repository.get(tag_id=tag_id)
+        await repository.get(model_id=tag_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
         )
-    return await repository.update(tag_id=tag_id, tag_update=tag_update)
+    return await repository.update(model_id=tag_id, model_update=tag_update)
 
 
 @router.delete(
@@ -163,11 +156,10 @@ async def delete_tag(
     tag_id: int,
     repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> None:
-    """http://localhost:8000/api/customers/1/tags/1"""
     try:
-        await repository.get(tag_id=tag_id)
+        await repository.get(model_id=tag_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
         )
-    return await repository.delete(tag_id=tag_id)
+    return await repository.delete(model=Tag, model_id=tag_id)

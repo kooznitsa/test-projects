@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, Session
 from db.config import settings
 from db.sample_data import add_sample_data
 from db.sessions import engine
-from routers import phone_codes, timezones, statuses, customers
+from routers import phone_codes, timezones, customers
 
 app = FastAPI(
     title=settings.title,

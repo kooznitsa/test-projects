@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .phone_codes import PhoneCode
     from .timezones import Timezone
     from .tags import Tag, TagRead
+    from .messages import Message
 
 
 class CustomerBase(SQLModel):
@@ -34,6 +35,7 @@ class Customer(CustomerBase, table=True):
     phone_code: Optional['PhoneCode'] = Relationship(back_populates='customers')
     timezone: Optional['Timezone'] = Relationship(back_populates='customers')
     tags: list['Tag'] = Relationship(back_populates='customers', link_model=CustomerTag)
+    messages: list['Message'] = Relationship(back_populates='customer')
 
 
 class CustomerCreate(CustomerBase):

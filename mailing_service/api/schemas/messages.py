@@ -2,18 +2,28 @@ from typing import Optional, TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 
-from .base_classes import TimeStampModel
+from .base import StatusEnum, TimeStampModel
 
 if TYPE_CHECKING:
-    from .statuses import Status
     from .mailouts import Mailout
+    from .customers import Customer
 
 
 class MessageBase(SQLModel):
     text_message: str
-    status_id: int | None = Field(default=1, foreign_key='statuses.id')
+    status: StatusEnum = StatusEnum.created
     mailout_id: int | None = Field(default=None, foreign_key='mailouts.id')
     customer_id: int | None = Field(default=None, foreign_key='customers.id')
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "text_message": "Test message",
+                "status": "created",
+                "mailout_id": 1,
+                "customer_id": 1
+            }
+        }
 
 
 class Message(MessageBase, TimeStampModel, table=True):
@@ -21,8 +31,8 @@ class Message(MessageBase, TimeStampModel, table=True):
 
     id: int | None = Field(primary_key=True, default=None)
 
-    status: 'Status' = Relationship(back_populates='messages')
     mailout: 'Mailout' = Relationship(back_populates='messages')
+    customer: 'Customer' = Relationship(back_populates='messages')
 
 
 class MessageCreate(MessageBase):
@@ -35,6 +45,6 @@ class MessageRead(MessageBase, TimeStampModel):
 
 class MessageUpdate(SQLModel):
     text_message: Optional[str]
-    status_id: int | None = None
+    status: Optional[StatusEnum] = None
     mailout_id: int | None = None
     customer_id: int | None = None

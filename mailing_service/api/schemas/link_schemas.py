@@ -21,16 +21,6 @@ class MailoutTag(SQLModel, table=True):
     )
 
 
-class MailoutCustomer(SQLModel, table=True):
-    __tablename__: str = 'mailouts_customers'
-    mailout_id: int | None = Field(
-        default=None, foreign_key='mailouts.id', primary_key=True
-    )
-    customer_id: int | None = Field(
-        default=None, foreign_key='customers.id', primary_key=True
-    )
-
-
 class MailoutPhoneCode(SQLModel, table=True):
     __tablename__: str = 'mailouts_phone_codes'
     mailout_id: int | None = Field(

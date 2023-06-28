@@ -13,6 +13,13 @@ if TYPE_CHECKING:
 class PhoneCodeBase(SQLModel):
     phone_code: int
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "phone_code": 950
+            }
+        }
+
 
 class PhoneCode(PhoneCodeBase, table=True):
     __tablename__: str = 'phone_codes'

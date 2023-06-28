@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import async_engine, get_async_session, get_repository
 from repositories.phone_codes import PhoneCodeRepository
-from schemas.phone_codes import PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
+from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
 
 router = APIRouter(prefix='/phone_codes')
 
@@ -20,8 +20,7 @@ async def create_phone_code(
     phone_code_create: PhoneCodeCreate = Body(...),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
 ) -> PhoneCodeRead:
-    """http://localhost:8000/api/phone_codes"""
-    return await repository.create(phone_code_create=phone_code_create)
+    return await repository.create(model_create=phone_code_create)
 
 
 @router.get(
@@ -35,7 +34,6 @@ async def get_phone_codes(
     offset: int = Query(default=0),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository))
 ) -> list[Optional[PhoneCodeRead]]:
-    """http://localhost:8000/api/phone_codes"""
     return await repository.list(
         limit=limit,
         offset=offset,
@@ -52,9 +50,8 @@ async def get_phone_code(
     phone_code_id: int,
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
 ) -> PhoneCodeRead:
-    """http://localhost:8000/api/phone_codes/1"""
     try:
-        result = await repository.get(phone_code_id=phone_code_id)
+        result = await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
@@ -73,14 +70,13 @@ async def update_phone_code(
     phone_code_update: PhoneCodeUpdate = Body(...),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
 ) -> PhoneCodeRead:
-    """http://localhost:8000/api/phone_codes/1"""
     try:
-        await repository.get(phone_code_id=phone_code_id)
+        await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
         )
-    return await repository.update(phone_code_id=phone_code_id, phone_code_update=phone_code_update)
+    return await repository.update(model_id=phone_code_id, model_update=phone_code_update)
 
 
 @router.delete(
@@ -92,11 +88,10 @@ async def delete_phone_code(
     phone_code_id: int,
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
 ) -> None:
-    """http://localhost:8000/api/phone_codes/1"""
     try:
-        await repository.get(phone_code_id=phone_code_id)
+        await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
         )
-    return await repository.delete(phone_code_id=phone_code_id)
+    return await repository.delete(model=PhoneCode, model_id=phone_code_id)
