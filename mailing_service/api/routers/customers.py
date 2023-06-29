@@ -23,7 +23,7 @@ async def create_customer(
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
     try:
-        return await repository.create(customer_create=customer_create)
+        return await repository.create(model_create=customer_create)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code or timezone not found'
@@ -62,7 +62,7 @@ async def get_customer(
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
     try:
-        result = await repository.get(customer_id=customer_id)
+        result = await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
@@ -82,7 +82,7 @@ async def update_customer(
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> CustomerRead:
     try:
-        await repository.get(customer_id=customer_id)
+        await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
@@ -100,7 +100,7 @@ async def delete_customer(
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
 ) -> None:
     try:
-        await repository.get(customer_id=customer_id)
+        await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
@@ -120,7 +120,7 @@ async def create_tag(
     repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> TagRead:
     try:
-        return await repository.create(model_id=customer_id, tag_create=tag_create, model=Customer)
+        return await repository.create(model_id=customer_id, tag_create=tag_create, parent_model=Customer)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'

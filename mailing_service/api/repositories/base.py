@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.errors import EntityDoesNotExist
@@ -13,7 +14,27 @@ class BaseRepository:
         results = await self.session.exec(query)
         return results.scalars().first()
 
-    async def _upsert_value(self, result, model, model_create):
+    async def _get_instance_with_related(self, model, item):
+        try:
+            options = selectinload(model.tags).selectinload(model.phone_codes)
+        except AttributeError:
+            options = selectinload(model.tags)
+
+        result = await self.session.scalars(
+            select(model)
+            .where(model.id == item.id)
+            .options(options)
+        )
+        return result.first()
+
+    async def _add_to_db(self, new_item):
+        self.session.add(new_item)
+        await self.session.commit()
+        await self.session.refresh(new_item)
+
+    async def _upsert(self, query, model, model_create):
+        result = await self.session.exec(query)
+        result = result.scalars().first()
         model_from_orm = model.from_orm(model_create)
 
         if result is None:
@@ -21,18 +42,12 @@ class BaseRepository:
 
         for k, v in model_from_orm.dict(exclude_unset=True).items():
             setattr(result, k, v)
-
         return result
 
-    async def create(self, query, model, model_create):
-        result = await self.session.exec(query)
-        new_item = await self._upsert_value(
-            result.scalars().first(), model, model_create
-        )
-        self.session.add(new_item)
-        await self.session.commit()
-        await self.session.refresh(new_item)
-        return new_item
+    async def _create_not_unique(self, model, model_create):
+        new_item = model.from_orm(model_create)
+        await self._add_to_db(new_item)
+        return await self._get_instance_with_related(model, new_item)
 
     async def list(self, model, limit: int, offset: int = 0):
         query = select(model).order_by(model.id).offset(offset).limit(limit)
@@ -53,9 +68,7 @@ class BaseRepository:
             )
             for key, value in item_dict.items():
                 setattr(item, key, value)
-            self.session.add(item)
-            await self.session.commit()
-            await self.session.refresh(item)
+            await self._add_to_db(item)
             return model_read_instance(**item.dict())
         else:
             raise EntityDoesNotExist

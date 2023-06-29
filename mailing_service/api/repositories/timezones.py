@@ -12,7 +12,9 @@ class TimezoneRepository(BaseRepository):
 
     async def create(self, model_create: TimezoneCreate) -> TimezoneRead:
         query = select(self.model).where(self.model.timezone == model_create.timezone)
-        return await super().create(query, self.model, model_create)
+        result = await self._upsert(query, self.model, model_create)
+        await self._add_to_db(result)
+        return result
 
     async def list(self, limit: int, offset: int = 0) -> list[TimezoneRead]:
         return await super().list(self.model, limit, offset)

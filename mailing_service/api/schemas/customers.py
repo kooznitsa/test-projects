@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class CustomerBase(SQLModel):
     country_code: int = Field(default=7)
     phone_code_id: int | None = Field(default=None, foreign_key='phone_codes.id')
-    phone: int
+    phone: int = Field(index=True)
     timezone_id: int | None = Field(default=1, foreign_key='timezones.id')
 
     class Config:
@@ -50,6 +50,7 @@ class CustomerRead(CustomerBase):
 
 
 class CustomerUpdate(SQLModel):
-    phone: str | None = None
+    country_code: int | None = None
     phone_code_id: int | None = None
+    phone: int | None = None
     timezone_id: int | None = None

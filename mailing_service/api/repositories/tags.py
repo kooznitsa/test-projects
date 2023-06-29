@@ -12,17 +12,15 @@ class TagRepository(BaseRepository):
     model = Tag
     model_read = TagRead
 
-    async def create(self, model_id: int, tag_create: TagCreate, model) -> TagRead:
+    async def create(self, model_id: int, tag_create: TagCreate, parent_model) -> TagRead:
         model_query = await self.session.scalars(
-            select(model)
-            .where(model.id == model_id)
-            .options(selectinload(model.tags))
+            select(parent_model)
+            .where(parent_model.id == model_id)
+            .options(selectinload(parent_model.tags))
         )
-
         if item := model_query.first():
-            tag_query = select(Tag).where(Tag.tag == tag_create.tag)
-            result = await self.session.exec(tag_query)
-            new_tag = await self._upsert_value(result.scalars().first(), Tag, tag_create)
+            tag_query = select(self.model).where(self.model.tag == tag_create.tag)
+            new_tag = await self._upsert(tag_query, Tag, tag_create)
             self.session.add(new_tag)
             item.tags.append(new_tag)
             await self.session.commit()
