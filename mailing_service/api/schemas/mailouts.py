@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 
 from sqlmodel import SQLModel, Field, Relationship
 
+from .phone_codes import PhoneCodeRead
+from .tags import TagRead
 from .link_schemas import MailoutPhoneCode, MailoutTag
 
 if TYPE_CHECKING:
@@ -16,6 +18,16 @@ class MailoutBase(SQLModel):
     finish_time: datetime
     available_start: time | None = None
     available_finish: time | None = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "start_time": datetime(2023, 6, 30, 10, 0, 0),
+                "finish_time": datetime(2023, 6, 30, 11, 0, 0),
+                "available_start": time(10, 0, 0),
+                "available_finish": time(19, 0, 0)
+            }
+        }
 
 
 class Mailout(MailoutBase, table=True):
@@ -33,5 +45,12 @@ class MailoutCreate(MailoutBase):
 
 class MailoutRead(MailoutBase):
     id: int
-    phones_codes: list['PhoneCodeRead'] = []
-    tags: list['TagRead'] = []
+    phone_codes: list[PhoneCodeRead] = []
+    tags: list[TagRead] = []
+
+
+class MailoutUpdate(SQLModel):
+    start_time: datetime | None = None
+    finish_time: datetime | None = None
+    available_start: time | None = None
+    available_finish: time | None = None

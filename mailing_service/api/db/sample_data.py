@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 from sqlmodel import Session
 from sqlalchemy import inspect, select, text
 
@@ -108,65 +110,17 @@ def add_sample_data():
         session.commit()
         session.refresh(customer1)
 
+        mailout = Mailout.from_orm(
+            MailoutCreate(
+                start_time=datetime(2023, 6, 30, 10, 0, 0),
+                finish_time=datetime(2023, 6, 30, 11, 0, 0),
+                available_start=time(10, 0, 0),
+                available_finish=time(19, 0, 0),
+            )
+        )
+        mailout.tags.extend([tag1, tag2])
+        mailout.phone_codes.extend([phone_code1])
 
-        # # message1 = MessageInput(text_message='Test message 1')
-        # # message2 = MessageInput(text_message='Test message 2')
-        # message1 = await upsert_value(session, Message, MessageInput, 'text_message', 'Test message 1')
-        # message2 = await upsert_value(session, Message, MessageInput, 'text_message', 'Test message 2')
-        #
-        # # await session.execute(insert_or_update(PhoneCode, {phone_code1, phone_code2}))
-        # # await session.execute(insert_or_update(Timezone, {timezone}))
-        # # await session.execute(insert_or_update(Tag, {ctag1, ctag2, ctag3, ctag4, ctag5, mtag1, mtag2, mtag3}))
-        # # await session.execute(insert_or_update(Message, {message1, message2}))
-        #
-        # # await session.flush()
-        # # await session.commit()
-        #
-        # # phone1 = CustomerInput(phone='79251234567')
-        # # phone2 = CustomerInput(phone='79351234588')
-        #
-        # customer1 = Customer.from_orm(
-        #     CustomerInput(phone='79251234567'),
-        #     update={
-        #         'phone_code': phone_code1,
-        #         'timezone': timezone,
-        #         'tags': list({ctag1, ctag2, ctag3})
-        #     }
-        # )
-        #
-        # customer2 = Customer.from_orm(
-        #     CustomerInput(phone='79351234588'),
-        #     update={
-        #         'phone_code': phone_code2,
-        #         'timezone': timezone,
-        #         'tags': list({ctag4, ctag5})
-        #     }
-        # )
-        #
-        # await session.add(customer1)
-        # await session.add(customer2)
-        # await session.commit()
-        # await session.refresh(customer1)
-        # await session.refresh(customer2)
-        #
-        # print(f'Customer 1: {customer1}')
-        # print(f'Customer 2: {customer2}')
-        #
-        # mailout = Mailout.from_orm(
-        #     MailoutInput(
-        #         start_time=datetime(2023, 6, 12, 10, 30),
-        #         finish_time=datetime(2023, 6, 15, 10, 30),
-        #         available_start=time(10, 30, 0),
-        #         available_finish=time(19, 30, 0),
-        #     ), update={
-        #         'tags': list({mtag1, mtag2, mtag3}),
-        #         'customers': list({customer1, customer2}),
-        #         'phone_codes': list({phone_code1, phone_code2}),
-        #         'messages': list({message1, message2}),
-        #     }
-        # )
-        #
-        # await session.add(mailout)
-        # await session.commit()
-        # await session.refresh(mailout)
-        # print(f'Mailout: {mailout}')
+        session.add(mailout)
+        session.commit()
+        session.refresh(mailout)

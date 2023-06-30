@@ -54,7 +54,8 @@ async def get_phone_code(
         result = await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Phone code with ID={phone_code_id} not found'
         )
     return result
 
@@ -74,9 +75,12 @@ async def update_phone_code(
         await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Phone code with ID={phone_code_id} not found'
         )
-    return await repository.update(model_id=phone_code_id, model_update=phone_code_update)
+    return await repository.update(
+        model_id=phone_code_id, model_update=phone_code_update
+    )
 
 
 @router.delete(
@@ -92,6 +96,7 @@ async def delete_phone_code(
         await repository.get(model_id=phone_code_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code with ID={phone_code_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Phone code with ID={phone_code_id} not found'
         )
     return await repository.delete(model=PhoneCode, model_id=phone_code_id)

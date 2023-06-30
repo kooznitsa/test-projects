@@ -64,3 +64,22 @@ class CustomerRepository(BaseRepository):
     async def update(self, model_id: int, model_update: CustomerUpdate) -> Optional[CustomerRead]:
         item = await super().update(self.model, model_id, model_update, self.model_read)
         return await self._get_instance_with_related(self.model, item)
+
+    async def delete_customer_tag(
+        self,
+        customer_id: int,
+        tag_id: int,
+    ) -> Optional[CustomerRead]:
+
+        tag_query = await self.session.scalars(select(Tag).where(Tag.id == tag_id))
+        tag_to_delete = tag_query.first()
+
+        customer_query = select(self.model).where(self.model.id == customer_id)
+        customer = await self.session.scalars(customer_query.options(selectinload('*')))
+
+        if customer := customer.first():
+            customer.tags.remove(tag_to_delete)
+            await self._add_to_db(customer)
+            return await self._get_instance_with_related(self.model, customer)
+        else:
+            raise EntityDoesNotExist

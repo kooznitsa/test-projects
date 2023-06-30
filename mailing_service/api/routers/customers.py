@@ -26,7 +26,8 @@ async def create_customer(
         return await repository.create(model_create=customer_create)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Phone code or timezone not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Phone code or timezone not found'
         )
 
 
@@ -65,7 +66,8 @@ async def get_customer(
         result = await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Customer with ID={customer_id} not found'
         )
     return result
 
@@ -85,7 +87,8 @@ async def update_customer(
         await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Customer with ID={customer_id} not found'
         )
     return await repository.update(model_id=customer_id, model_update=customer_update)
 
@@ -103,7 +106,8 @@ async def delete_customer(
         await repository.get(model_id=customer_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Customer with ID={customer_id} not found'
         )
     return await repository.delete(model=Customer, model_id=customer_id)
 
@@ -112,54 +116,41 @@ async def delete_customer(
     '/{customer_id}/tags',
     response_model=TagRead,
     status_code=status.HTTP_201_CREATED,
-    name='create_tag',
+    name='create_customer_tag',
 )
-async def create_tag(
+async def create_customer_tag(
     customer_id: int,
     tag_create: TagCreate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
 ) -> TagRead:
     try:
-        return await repository.create(model_id=customer_id, tag_create=tag_create, parent_model=Customer)
+        return await repository.create(
+            model_id=customer_id, tag_create=tag_create, parent_model=Customer
+        )
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Customer with ID={customer_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Customer with ID={customer_id} not found'
         )
 
 
-@router.put(
+@router.post(
     '/{customer_id}/tags/{tag_id}',
-    response_model=TagRead,
-    status_code=status.HTTP_200_OK,
-    name='update_tag',
+    response_model=CustomerRead,
+    status_code=status.HTTP_201_CREATED,
+    name='delete_customer_tag',
 )
-async def update_tag(
+async def delete_customer_tag(
+    customer_id: int,
     tag_id: int,
-    tag_update: TagUpdate = Body(...),
-    repository: TagRepository = Depends(get_repository(TagRepository)),
-) -> TagRead:
+    repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+) -> CustomerRead:
     try:
-        await repository.get(model_id=tag_id)
+        return await repository.delete_customer_tag(
+            tag_id=tag_id, customer_id=customer_id
+        )
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Customer with ID={customer_id} not found'
         )
-    return await repository.update(model_id=tag_id, model_update=tag_update)
-
-
-@router.delete(
-    '/{customer_id}/tags/{tag_id}',
-    status_code=status.HTTP_200_OK,
-    name='delete_tag',
-)
-async def delete_tag(
-    tag_id: int,
-    repository: TagRepository = Depends(get_repository(TagRepository)),
-) -> None:
-    try:
-        await repository.get(model_id=tag_id)
-    except EntityDoesNotExist:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Tag with ID={tag_id} not found'
-        )
-    return await repository.delete(model=Tag, model_id=tag_id)

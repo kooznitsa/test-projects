@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, Session
 from db.config import settings
 from db.sample_data import add_sample_data
 from db.sessions import engine
-from routers import phone_codes, timezones, customers
+from routers import phone_codes, timezones, tags, customers, mailouts
 
 app = FastAPI(
     title=settings.title,
@@ -17,7 +17,9 @@ app = FastAPI(
 
 app.include_router(phone_codes.router, prefix=settings.api_prefix, tags=['Phone Codes'])
 app.include_router(timezones.router, prefix=settings.api_prefix, tags=['Timezones'])
+app.include_router(tags.router, prefix=settings.api_prefix, tags=['Tags'])
 app.include_router(customers.router, prefix=settings.api_prefix, tags=['Customers'])
+app.include_router(mailouts.router, prefix=settings.api_prefix, tags=['Mailouts'])
 
 
 # @app.on_event('startup')

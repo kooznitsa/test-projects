@@ -51,7 +51,8 @@ async def get_timezone(
         result = await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Timezone with ID={timezone_id} not found'
         )
     return result
 
@@ -71,7 +72,8 @@ async def update_timezone(
         await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Timezone with ID={timezone_id} not found'
         )
     return await repository.update(model_id=timezone_id, model_update=timezone_update)
 
@@ -89,6 +91,7 @@ async def delete_timezone(
         await repository.get(model_id=timezone_id)
     except EntityDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f'Timezone with ID={timezone_id} not found'
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Timezone with ID={timezone_id} not found'
         )
     return await repository.delete(model=Timezone, model_id=timezone_id)

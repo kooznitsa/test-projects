@@ -15,16 +15,8 @@ class BaseRepository:
         return results.scalars().first()
 
     async def _get_instance_with_related(self, model, item):
-        try:
-            options = selectinload(model.tags).selectinload(model.phone_codes)
-        except AttributeError:
-            options = selectinload(model.tags)
-
-        result = await self.session.scalars(
-            select(model)
-            .where(model.id == item.id)
-            .options(options)
-        )
+        query = select(model).where(model.id == item.id)
+        result = await self.session.scalars(query.options(selectinload('*')))
         return result.first()
 
     async def _add_to_db(self, new_item):
