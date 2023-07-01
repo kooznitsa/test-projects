@@ -13,7 +13,6 @@ from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUp
 
 class CustomerRepository(BaseRepository):
     model = Customer
-    model_read = CustomerRead
 
     async def create(self, model_create: CustomerCreate) -> CustomerRead:
         phone_code_query = await self.session.exec(

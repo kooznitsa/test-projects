@@ -10,7 +10,6 @@ from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, Phone
 
 class PhoneCodeRepository(BaseRepository):
     model = PhoneCode
-    model_read = PhoneCodeRead
 
     async def create(
         self,

@@ -11,7 +11,6 @@ from schemas.mailouts import Mailout, MailoutRead, MailoutCreate, MailoutUpdate
 
 class MailoutRepository(BaseRepository):
     model = Mailout
-    model_read = MailoutRead
 
     async def create(self, model_create: MailoutCreate) -> MailoutRead:
         return await self._create_not_unique(self.model, model_create)

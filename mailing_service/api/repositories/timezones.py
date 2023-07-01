@@ -8,7 +8,6 @@ from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead, TimezoneUp
 
 class TimezoneRepository(BaseRepository):
     model = Timezone
-    model_read = TimezoneRead
 
     async def create(self, model_create: TimezoneCreate) -> TimezoneRead:
         query = select(self.model).where(self.model.timezone == model_create.timezone)

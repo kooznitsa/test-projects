@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
 from db.errors import EntityDoesNotExist
-from db.sessions import async_engine, get_async_session, get_repository
+from db.sessions import get_repository
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from repositories.tags import TagRepository
 

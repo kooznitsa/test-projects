@@ -10,7 +10,6 @@ from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 
 class TagRepository(BaseRepository):
     model = Tag
-    model_read = TagRead
 
     async def create(self, model_id: int, tag_create: TagCreate, parent_model) -> TagRead:
         model_query = await self.session.scalars(
