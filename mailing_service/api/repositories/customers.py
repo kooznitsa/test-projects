@@ -21,7 +21,7 @@ class CustomerRepository(BaseRepository):
             .where(PhoneCode.id == model_create.phone_code_id)
         )
         phone_code = phone_code_query.first()
-        timezone_query = await self.session.execute(
+        timezone_query = await self.session.exec(
             select(Timezone)
             .where(Timezone.id == model_create.timezone_id)
         )
@@ -56,30 +56,10 @@ class CustomerRepository(BaseRepository):
         return results.all()
 
     async def get(self, model_id: int) -> Optional[CustomerRead]:
-        if customer := await self._get_instance(self.model, model_id):
-            return await self._get_instance_with_related(self.model, customer)
-        else:
-            raise EntityDoesNotExist
+        return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: CustomerUpdate) -> Optional[CustomerRead]:
-        item = await super().update(self.model, model_id, model_update, self.model_read)
-        return await self._get_instance_with_related(self.model, item)
+        return await super().update(self.model, model_id, model_update)
 
-    async def delete_customer_tag(
-        self,
-        customer_id: int,
-        tag_id: int,
-    ) -> Optional[CustomerRead]:
-
-        tag_query = await self.session.scalars(select(Tag).where(Tag.id == tag_id))
-        tag_to_delete = tag_query.first()
-
-        customer_query = select(self.model).where(self.model.id == customer_id)
-        customer = await self.session.scalars(customer_query.options(selectinload('*')))
-
-        if customer := customer.first():
-            customer.tags.remove(tag_to_delete)
-            await self._add_to_db(customer)
-            return await self._get_instance_with_related(self.model, customer)
-        else:
-            raise EntityDoesNotExist
+    async def delete_customer_tag(self, model_id: int, tag_id: int) -> Optional[CustomerRead]:
+        return await super().delete_model_tag(self.model, model_id, Tag, tag_id)

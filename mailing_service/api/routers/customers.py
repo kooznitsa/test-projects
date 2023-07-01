@@ -147,10 +147,10 @@ async def delete_customer_tag(
 ) -> CustomerRead:
     try:
         return await repository.delete_customer_tag(
-            tag_id=tag_id, customer_id=customer_id
+            tag_id=tag_id, model_id=customer_id
         )
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Customer with ID={customer_id} not found'
+            detail=f'Customer or tag not found'
         )

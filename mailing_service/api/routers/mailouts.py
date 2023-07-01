@@ -168,11 +168,11 @@ async def delete_mailout_tag(
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
 ) -> MailoutRead:
     try:
-        return await repository.delete_mailout_tag(tag_id=tag_id, mailout_id=mailout_id)
+        return await repository.delete_mailout_tag(tag_id=tag_id, model_id=mailout_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Mailout with ID={mailout_id} not found'
+            detail=f'Mailout or tag not found'
         )
 
 
@@ -189,10 +189,10 @@ async def delete_mailout_phone_code(
 ) -> MailoutRead:
     try:
         return await repository.delete_mailout_phone_code(
-            phone_code_id=phone_code_id, mailout_id=mailout_id
+            phone_code_id=phone_code_id, model_id=mailout_id
         )
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Mailout with ID={mailout_id} not found'
+            detail=f'Mailout or phone code not found'
         )

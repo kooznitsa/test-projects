@@ -3,7 +3,6 @@ from typing import Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from db.errors import EntityDoesNotExist
 from repositories.base import BaseRepository
 from schemas.phone_codes import PhoneCode
 from schemas.tags import Tag
@@ -34,49 +33,13 @@ class MailoutRepository(BaseRepository):
         return results.all()
 
     async def get(self, model_id: int) -> Optional[MailoutRead]:
-        if mailout := await self._get_instance(self.model, model_id):
-            return await self._get_instance_with_related(self.model, mailout)
-        else:
-            raise EntityDoesNotExist
+        return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: MailoutUpdate) -> Optional[MailoutRead]:
-        item = await super().update(self.model, model_id, model_update, self.model_read)
-        return await self._get_instance_with_related(self.model, item)
+        return await super().update(self.model, model_id, model_update)
 
-    async def delete_mailout_tag(
-        self,
-        mailout_id: int,
-        tag_id: int,
-    ) -> Optional[MailoutRead]:
+    async def delete_mailout_tag(self, model_id: int, tag_id: int) -> Optional[MailoutRead]:
+        return await super().delete_model_tag(self.model, model_id, Tag, tag_id)
 
-        tag_query = await self.session.scalars(select(Tag).where(Tag.id == tag_id))
-        tag_to_delete = tag_query.first()
-
-        mailout_query = select(self.model).where(self.model.id == mailout_id)
-        mailout = await self.session.scalars(mailout_query.options(selectinload('*')))
-
-        if mailout := mailout.first():
-            mailout.tags.remove(tag_to_delete)
-            await self._add_to_db(mailout)
-            return await self._get_instance_with_related(self.model, mailout)
-        else:
-            raise EntityDoesNotExist
-
-    async def delete_mailout_phone_code(
-        self,
-        mailout_id: int,
-        phone_code_id: int,
-    ) -> Optional[MailoutRead]:
-
-        phone_code_query = await self.session.scalars(select(PhoneCode).where(PhoneCode.id == phone_code_id))
-        phone_code_to_delete = phone_code_query.first()
-
-        mailout_query = select(self.model).where(self.model.id == mailout_id)
-        mailout = await self.session.scalars(mailout_query.options(selectinload('*')))
-
-        if mailout := mailout.first():
-            mailout.phone_codes.remove(phone_code_to_delete)
-            await self._add_to_db(mailout)
-            return await self._get_instance_with_related(self.model, mailout)
-        else:
-            raise EntityDoesNotExist
+    async def delete_mailout_phone_code(self, model_id: int, phone_code_id: int) -> Optional[MailoutRead]:
+        return await super().delete_model_phone_code(self.model, model_id, PhoneCode, phone_code_id)
