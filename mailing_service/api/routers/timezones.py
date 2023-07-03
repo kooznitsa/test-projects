@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
-from db.errors import EntityDoesNotExist
+from db.errors import EntityDoesNotExist, TimezoneError
 from db.sessions import get_repository
 from repositories.timezones import TimezoneRepository
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead, TimezoneUpdate
@@ -20,7 +20,13 @@ async def create_timezone(
     timezone_create: TimezoneCreate = Body(...),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
 ) -> TimezoneRead:
-    return await repository.create(model_create=timezone_create)
+    try:
+        return await repository.create(model_create=timezone_create)
+    except TimezoneError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Timezone is not in the list of timezones'
+        )
 
 
 @router.get(
@@ -75,7 +81,13 @@ async def update_timezone(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Timezone with ID={timezone_id} not found'
         )
-    return await repository.update(model_id=timezone_id, model_update=timezone_update)
+    try:
+        return await repository.update(model_id=timezone_id, model_update=timezone_update)
+    except TimezoneError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Timezone is not in the list of timezones'
+        )
 
 
 @router.delete(

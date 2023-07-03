@@ -28,4 +28,4 @@ class TimezoneRepository(BaseRepository):
     async def update(self, model_id: int, model_update: TimezoneUpdate) -> Optional[TimezoneRead]:
         if model_update.timezone not in zoneinfo.available_timezones():
             raise TimezoneError
-        return await super().update(self.model, model_id, model_update, self.model_read)
+        return await super().update(self.model, model_id, model_update)

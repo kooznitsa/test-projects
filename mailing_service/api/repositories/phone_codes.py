@@ -46,4 +46,4 @@ class PhoneCodeRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: PhoneCodeUpdate) -> Optional[PhoneCodeRead]:
-        return await super().update(self.model, model_id, model_update, self.model_read)
+        return await super().update(self.model, model_id, model_update)

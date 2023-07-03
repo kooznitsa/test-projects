@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
-from db.errors import EntityDoesNotExist
+from db.errors import EntityDoesNotExist, PhoneLengthError
 from db.sessions import get_repository
 from repositories.customers import CustomerRepository
 from repositories.tags import TagRepository
@@ -28,6 +28,11 @@ async def create_customer(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Phone code or timezone not found'
+        )
+    except PhoneLengthError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Phone length is not equal to 7 digits'
         )
 
 
@@ -90,7 +95,13 @@ async def update_customer(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Customer with ID={customer_id} not found'
         )
-    return await repository.update(model_id=customer_id, model_update=customer_update)
+    try:
+        return await repository.update(model_id=customer_id, model_update=customer_update)
+    except PhoneLengthError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Phone length is not equal to 7 digits'
+        )
 
 
 @router.delete(

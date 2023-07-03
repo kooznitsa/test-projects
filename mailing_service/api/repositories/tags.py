@@ -32,4 +32,4 @@ class TagRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: TagUpdate) -> Optional[TagRead]:
-        return await super().update(self.model, model_id, model_update, self.model_read)
+        return await super().update(self.model, model_id, model_update)
