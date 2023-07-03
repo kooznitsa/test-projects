@@ -1,48 +1,29 @@
 from datetime import datetime, time
 
 from sqlmodel import Session
-from sqlalchemy import inspect, select, text
+from sqlalchemy import select
 
 from db.sessions import engine
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate
 from schemas.timezones import Timezone, TimezoneCreate
-from schemas.tags import Tag, TagCreate, TagRead
+from schemas.tags import Tag, TagCreate
 from schemas.messages import Message, MessageCreate
-from schemas.customers import Customer, CustomerCreate, CustomerRead
+from schemas.customers import Customer, CustomerCreate
 from schemas.mailouts import Mailout, MailoutCreate
 
 
+def add_to_db(session, item):
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+
+
 def upsert_value(session, result, model_from_orm):
-    """Upsert a value.
-
-    It is used to create a value in the database if it does not already exist,
-    else it is used to update the existing one.
-
-    Args:
-      session:
-        with Session(engine) as session: ...
-      result:
-        The model data.
-      model_from_orm:
-        The model from_orm(model_create) data.
-
-    Returns:
-      The upserted model.
-    """
-
-    # if the entity does not exist, create it
     if result is None:
         result = model_from_orm
-
-    # sync the data
     for k, v in model_from_orm.dict(exclude_unset=True).items():
         setattr(result, k, v)
-
-    # persist the data to the database
-    session.add(result)
-    session.commit()
-    session.refresh(result)
-
+    add_to_db(session, result)
     return result
 
 
@@ -82,14 +63,16 @@ def upsert_tag(session, value):
 def add_sample_data():
     with Session(engine) as session:
         phone_code1 = upsert_phone_code(session, 925)
-        print(phone_code1)
+        phone_code2 = upsert_phone_code(session, 980)
+        phone_code3 = upsert_phone_code(session, 967)
 
-        timezone = upsert_timezone(session, 'Europe/Moscow')
-        print(timezone)
+        timezone1 = upsert_timezone(session, 'Europe/Moscow')
+        timezone2 = upsert_timezone(session, 'Europe/Belgrade')
 
-        tag1 = upsert_tag(session, 'Woman')
+        tag1 = upsert_tag(session, 'Female')
         tag2 = upsert_tag(session, 'Unemployed')
-        print(tag1)
+        tag3 = upsert_tag(session, 'Male')
+        tag4 = upsert_tag(session, 'Student')
 
         customer1 = Customer.from_orm(
             CustomerCreate(
@@ -98,17 +81,24 @@ def add_sample_data():
             ),
             update={
                 'phone_code_id': phone_code1.id,
-                'timezone_id': timezone.id,
+                'timezone_id': timezone1.id,
             }
         )
-
-        print(customer1.tags)
-
         customer1.tags.extend([tag1, tag2])
+        add_to_db(session, customer1)
 
-        session.add(customer1)
-        session.commit()
-        session.refresh(customer1)
+        customer2 = Customer.from_orm(
+            CustomerCreate(
+                country_code=7,
+                phone=4444444,
+            ),
+            update={
+                'phone_code_id': phone_code2.id,
+                'timezone_id': timezone2.id,
+            }
+        )
+        customer2.tags.extend([tag3, tag4])
+        add_to_db(session, customer2)
 
         mailout = Mailout.from_orm(
             MailoutCreate(
@@ -118,9 +108,15 @@ def add_sample_data():
                 available_finish=time(19, 0, 0),
             )
         )
-        mailout.tags.extend([tag1, tag2])
-        mailout.phone_codes.extend([phone_code1])
+        mailout.tags.extend([tag1, tag2, tag3, tag4])
+        mailout.phone_codes.extend([phone_code1, phone_code2, phone_code3])
+        add_to_db(session, mailout)
 
-        session.add(mailout)
-        session.commit()
-        session.refresh(mailout)
+        message = Message.from_orm(
+            MessageCreate(
+                text_message='Hello world',
+                mailout_id=1,
+                customer_id=1,
+            )
+        )
+        add_to_db(session, message)

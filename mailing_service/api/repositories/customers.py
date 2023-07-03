@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from db.errors import EntityDoesNotExist
+from db.errors import EntityDoesNotExist, PhoneLengthError
 from repositories.base import BaseRepository
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead
@@ -26,6 +26,8 @@ class CustomerRepository(BaseRepository):
         )
         timezone = timezone_query.first()
 
+        if len(str(model_create.phone)) != 7:
+            raise PhoneLengthError
         if not phone_code or not timezone:
             raise EntityDoesNotExist
         else:
@@ -58,6 +60,8 @@ class CustomerRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: CustomerUpdate) -> Optional[CustomerRead]:
+        if len(str(model_update.phone)) != 7:
+            raise PhoneLengthError
         return await super().update(self.model, model_id, model_update)
 
     async def delete_customer_tag(self, model_id: int, tag_id: int) -> Optional[CustomerRead]:
