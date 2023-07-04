@@ -1,10 +1,13 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Request
 from sqlmodel import SQLModel, Session
+from starlette.responses import JSONResponse
+from starlette import status
 
 from db.config import settings
+from db.errors import PhoneLengthError, TimezoneError
 from db.sample_data import add_sample_data
 from db.sessions import engine
-from routers import phone_codes, timezones, tags, customers, mailouts, messages
+from routers import phone_codes, timezones, tags, customers, mailouts, messages, web
 
 app = FastAPI(
     title=settings.title,
@@ -22,6 +25,7 @@ routers = (
     (customers.router, 'Customers'),
     (mailouts.router, 'Mailouts'),
     (messages.router, 'Messages'),
+    (web.router, 'Web'),
 )
 
 for router, tags in routers:
@@ -33,6 +37,22 @@ async def init_tables():
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     add_sample_data()
+
+
+@app.exception_handler(PhoneLengthError)
+async def phone_length_exception_handler(request: Request, exc: PhoneLengthError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={'message': 'Phone length is not equal to 7 digits'},
+    )
+
+
+@app.exception_handler(TimezoneError)
+async def timezone_exception_handler(request: Request, exc: TimezoneError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={'message': 'Timezone is not in the list of timezones'},
+    )
 
 
 @app.get('/')
