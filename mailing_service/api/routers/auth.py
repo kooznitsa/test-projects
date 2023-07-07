@@ -5,6 +5,7 @@ from starlette import status
 from db.errors import UserCredentialsError
 from db.sessions import get_session, get_repository
 from repositories.users import UserRepository
+from schemas.tokens import Token
 from schemas.users import User, UserRead
 
 URL_PREFIX = '/auth'
@@ -28,6 +29,7 @@ async def get_current_user(
 
 @router.post(
     '/token',
+    response_model=Token,
     status_code=status.HTTP_200_OK,
     name='login_user',
 )
