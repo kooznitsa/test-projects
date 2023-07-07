@@ -5,7 +5,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.phone_codes import PhoneCodeRepository
+from routers.auth import get_current_user
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
+from schemas.users import User
 
 router = APIRouter(prefix='/phone_codes')
 
@@ -19,6 +21,7 @@ router = APIRouter(prefix='/phone_codes')
 async def create_phone_code(
     phone_code_create: PhoneCodeCreate = Body(...),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+    user: User = Depends(get_current_user),
 ) -> PhoneCodeRead:
     return await repository.create(model_create=phone_code_create)
 
@@ -70,6 +73,7 @@ async def update_phone_code(
     phone_code_id: int,
     phone_code_update: PhoneCodeUpdate = Body(...),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+    user: User = Depends(get_current_user),
 ) -> PhoneCodeRead:
     try:
         await repository.get(model_id=phone_code_id)
@@ -91,6 +95,7 @@ async def update_phone_code(
 async def delete_phone_code(
     phone_code_id: int,
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=phone_code_id)

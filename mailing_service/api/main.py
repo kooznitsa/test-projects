@@ -7,7 +7,7 @@ from db.config import settings
 from db.errors import PhoneLengthError, TimezoneError
 from db.sample_data import add_sample_data
 from db.sessions import engine
-from routers import phone_codes, timezones, tags, customers, mailouts, messages, web
+from routers import auth, phone_codes, timezones, tags, customers, mailouts, messages, web
 
 app = FastAPI(
     title=settings.title,
@@ -17,6 +17,8 @@ app = FastAPI(
     docs_url=settings.docs_url,
     openapi_url=settings.openapi_url,
 )
+
+app.include_router(auth.router, tags=['Authentication'])
 
 routers = (
     (phone_codes.router, 'Phone Codes'),

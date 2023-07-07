@@ -5,7 +5,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.timezones import TimezoneRepository
+from routers.auth import get_current_user
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead, TimezoneUpdate
+from schemas.users import User
 
 router = APIRouter(prefix='/timezones')
 
@@ -19,6 +21,7 @@ router = APIRouter(prefix='/timezones')
 async def create_timezone(
     timezone_create: TimezoneCreate = Body(...),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
+    user: User = Depends(get_current_user),
 ) -> TimezoneRead:
     return await repository.create(model_create=timezone_create)
 
@@ -67,6 +70,7 @@ async def update_timezone(
     timezone_id: int,
     timezone_update: TimezoneUpdate = Body(...),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
+    user: User = Depends(get_current_user),
 ) -> TimezoneRead:
     try:
         await repository.get(model_id=timezone_id)
@@ -86,6 +90,7 @@ async def update_timezone(
 async def delete_timezone(
     timezone_id: int,
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=timezone_id)

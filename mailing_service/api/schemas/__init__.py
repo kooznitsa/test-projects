@@ -5,3 +5,4 @@ import schemas.tags
 import schemas.messages
 import schemas.customers
 import schemas.mailouts
+import schemas.users

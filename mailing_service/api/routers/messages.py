@@ -5,7 +5,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.messages import MessageRepository
+from routers.auth import get_current_user
 from schemas.messages import Message, MessageCreate, MessageRead, MessageUpdate
+from schemas.users import User
 
 router = APIRouter(prefix='/messages')
 
@@ -19,6 +21,7 @@ router = APIRouter(prefix='/messages')
 async def create_message(
     message_create: MessageCreate = Body(...),
     repository: MessageRepository = Depends(get_repository(MessageRepository)),
+    user: User = Depends(get_current_user),
 ) -> MessageRead:
     try:
         return await repository.create(model_create=message_create)
@@ -73,6 +76,7 @@ async def update_message(
     message_id: int,
     message_update: MessageUpdate = Body(...),
     repository: MessageRepository = Depends(get_repository(MessageRepository)),
+    user: User = Depends(get_current_user),
 ) -> MessageRead:
     try:
         await repository.get(model_id=message_id)
@@ -93,6 +97,7 @@ async def update_message(
 async def delete_message(
     message_id: int,
     repository: MessageRepository = Depends(get_repository(MessageRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=message_id)

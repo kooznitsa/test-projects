@@ -2,8 +2,10 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
+from routers.auth import get_current_user
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from repositories.tags import TagRepository
+from schemas.users import User
 
 router = APIRouter(prefix='/tags')
 
@@ -18,6 +20,7 @@ async def update_tag(
     tag_id: int,
     tag_update: TagUpdate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
+    user: User = Depends(get_current_user),
 ) -> TagRead:
     try:
         await repository.get(model_id=tag_id)
@@ -36,6 +39,7 @@ async def update_tag(
 async def delete_tag(
     tag_id: int,
     repository: TagRepository = Depends(get_repository(TagRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=tag_id)

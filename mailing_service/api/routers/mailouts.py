@@ -7,9 +7,11 @@ from db.sessions import get_repository
 from repositories.phone_codes import PhoneCodeRepository
 from repositories.tags import TagRepository
 from repositories.mailouts import MailoutRepository
+from routers.auth import get_current_user
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from schemas.mailouts import Mailout, MailoutCreate, MailoutRead, MailoutUpdate
+from schemas.users import User
 
 router = APIRouter(prefix='/mailouts')
 
@@ -23,6 +25,7 @@ router = APIRouter(prefix='/mailouts')
 async def create_mailout(
     mailout_create: MailoutCreate = Body(...),
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
 ) -> MailoutRead:
     return await repository.create(model_create=mailout_create)
 
@@ -78,6 +81,7 @@ async def update_mailout(
     mailout_id: int,
     mailout_update: MailoutUpdate = Body(...),
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
 ) -> MailoutRead:
     try:
         await repository.get(model_id=mailout_id)
@@ -97,6 +101,7 @@ async def update_mailout(
 async def delete_mailout(
     mailout_id: int,
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=mailout_id)
@@ -118,6 +123,7 @@ async def create_mailout_tag(
     mailout_id: int,
     tag_create: TagCreate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
+    user: User = Depends(get_current_user),
 ) -> TagRead:
     try:
         return await repository.create(
@@ -142,6 +148,7 @@ async def create_mailout_phone_code(
     mailout_id: int,
     phone_code_create: PhoneCodeCreate = Body(...),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository)),
+    user: User = Depends(get_current_user),
 ) -> PhoneCodeRead:
     try:
         return await repository.create(
@@ -166,6 +173,7 @@ async def delete_mailout_tag(
     mailout_id: int,
     tag_id: int,
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
 ) -> MailoutRead:
     try:
         return await repository.delete_mailout_tag(tag_id=tag_id, model_id=mailout_id)
@@ -186,6 +194,7 @@ async def delete_mailout_phone_code(
     mailout_id: int,
     phone_code_id: int,
     repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
 ) -> MailoutRead:
     try:
         return await repository.delete_mailout_phone_code(

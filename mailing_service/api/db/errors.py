@@ -11,3 +11,8 @@ class PhoneLengthError(Exception):
 class TimezoneError(Exception):
     """Raised when input timezone is not in the list of timezones."""
     pass
+
+
+class UserCredentialsError(Exception):
+    """Raised when username or password are incorrect."""
+    pass

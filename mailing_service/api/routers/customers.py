@@ -6,8 +6,10 @@ from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.customers import CustomerRepository
 from repositories.tags import TagRepository
+from routers.auth import get_current_user
 from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
+from schemas.users import User
 
 router = APIRouter(prefix='/customers')
 
@@ -21,6 +23,7 @@ router = APIRouter(prefix='/customers')
 async def create_customer(
     customer_create: CustomerCreate = Body(...),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+    user: User = Depends(get_current_user),
 ) -> CustomerRead:
     try:
         return await repository.create(model_create=customer_create)
@@ -82,6 +85,7 @@ async def update_customer(
     customer_id: int,
     customer_update: CustomerUpdate = Body(...),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+    user: User = Depends(get_current_user),
 ) -> CustomerRead:
     try:
         await repository.get(model_id=customer_id)
@@ -101,6 +105,7 @@ async def update_customer(
 async def delete_customer(
     customer_id: int,
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+    user: User = Depends(get_current_user),
 ) -> None:
     try:
         await repository.get(model_id=customer_id)
@@ -122,6 +127,7 @@ async def create_customer_tag(
     customer_id: int,
     tag_create: TagCreate = Body(...),
     repository: TagRepository = Depends(get_repository(TagRepository)),
+    user: User = Depends(get_current_user),
 ) -> TagRead:
     try:
         return await repository.create(
@@ -144,6 +150,7 @@ async def delete_customer_tag(
     customer_id: int,
     tag_id: int,
     repository: CustomerRepository = Depends(get_repository(CustomerRepository)),
+    user: User = Depends(get_current_user),
 ) -> CustomerRead:
     try:
         return await repository.delete_customer_tag(

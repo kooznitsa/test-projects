@@ -10,6 +10,7 @@ from schemas.tags import Tag, TagCreate
 from schemas.messages import Message, MessageCreate
 from schemas.customers import Customer, CustomerCreate
 from schemas.mailouts import Mailout, MailoutCreate
+from schemas.users import User
 
 
 def add_to_db(session, item):
@@ -120,3 +121,7 @@ def add_sample_data():
             )
         )
         add_to_db(session, message)
+
+    user = User(username='shark')
+    user.set_password('qwerty')
+    add_to_db(session, user)
