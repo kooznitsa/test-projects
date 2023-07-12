@@ -36,7 +36,7 @@ class BaseRepository:
         await self._add_to_db(new_item)
         return await self._get_instance(model, new_item.id)
 
-    async def list(self, model, limit: int, offset: int = 0):
+    async def list(self, model, limit: int = 10, offset: int = 0):
         query = select(model).order_by(model.id).offset(offset).limit(limit)
         results = await self.session.exec(query)
         return results.scalars().all()

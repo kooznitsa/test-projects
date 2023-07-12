@@ -143,7 +143,7 @@ async def create_customer_tag(
 @router.post(
     '/{customer_id}/tags/{tag_id}',
     response_model=CustomerRead,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     name='delete_customer_tag',
 )
 async def delete_customer_tag(

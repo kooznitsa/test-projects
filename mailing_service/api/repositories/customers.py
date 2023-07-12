@@ -35,7 +35,7 @@ class CustomerRepository(BaseRepository):
 
     async def list(
         self,
-        limit: int,
+        limit: int = 50,
         tag: Optional[str] = None,
         phone_code: int | None = None,
         offset: int = 0,

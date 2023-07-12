@@ -21,7 +21,7 @@ class Settings(BaseConfig):
     postgres_server: str = os.environ.get('POSTGRES_SERVER', 'localhost')
     postgres_port: str = os.environ.get('POSTGRES_PORT', 5432)
     postgres_db: str = os.environ.get('POSTGRES_DB')
-    # postgres_db_tests: str = os.environ.get('POSTGRES_DB_TESTS')
+    postgres_db_tests: str = os.environ.get('POSTGRES_DB_TESTS')
     db_echo_log: bool = True if os.environ.get('DEBUG') == 'True' else False
 
     class Config:

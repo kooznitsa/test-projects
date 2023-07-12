@@ -39,7 +39,7 @@ class PhoneCodeRepository(BaseRepository):
         await self.session.refresh(result)
         return result
 
-    async def list(self, limit: int, offset: int = 0) -> list[PhoneCodeRead]:
+    async def list(self, limit: int = 10, offset: int = 0) -> list[PhoneCodeRead]:
         return await super().list(self.model, limit, offset)
 
     async def get(self, model_id: int) -> Optional[PhoneCodeRead]:

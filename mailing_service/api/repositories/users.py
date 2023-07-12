@@ -27,7 +27,7 @@ class UserRepository(BaseRepository):
         else:
             raise UserCredentialsError
 
-    def _create_access_token(self, data: dict, expires_delta: timedelta | None = None):
+    def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -57,7 +57,7 @@ class UserRepository(BaseRepository):
         user = user.first()
         if user and user.verify_password(form_data.password):
             access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            access_token = self._create_access_token(
+            access_token = self.create_access_token(
                 data={'sub': user.username}, expires_delta=access_token_expires
             )
             return {'access_token': access_token, 'token_type': 'bearer'}

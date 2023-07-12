@@ -166,7 +166,7 @@ async def create_mailout_phone_code(
 @router.post(
     '/{mailout_id}/tags/{tag_id}',
     response_model=MailoutRead,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     name='delete_mailout_tag',
 )
 async def delete_mailout_tag(
@@ -187,7 +187,7 @@ async def delete_mailout_tag(
 @router.post(
     '/{mailout_id}/phone_codes/{phone_code_id}',
     response_model=MailoutRead,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     name='delete_mailout_phone_code',
 )
 async def delete_mailout_phone_code(

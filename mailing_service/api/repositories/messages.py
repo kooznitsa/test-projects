@@ -31,7 +31,7 @@ class MessageRepository(BaseRepository):
         else:
             return await self._create_not_unique(self.model, model_create)
 
-    async def list(self, limit: int, offset: int = 0) -> list[MessageRead]:
+    async def list(self, limit: int = 50, offset: int = 0) -> list[MessageRead]:
         return await super().list(self.model, limit, offset)
 
     async def get(self, model_id: int) -> Optional[MessageRead]:

@@ -156,3 +156,8 @@ set search_path to pg_database_owner,public;
 \c mailing_db
 \dt
 ```
+
+Run tests:
+```
+docker exec -it fastapi_service poetry run pytest
+```
