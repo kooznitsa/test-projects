@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.timezones import TimezoneRepository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead, TimezoneUpdate
 from schemas.users import User
 

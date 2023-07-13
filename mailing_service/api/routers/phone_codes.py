@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.phone_codes import PhoneCodeRepository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
 from schemas.users import User
 

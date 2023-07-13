@@ -11,6 +11,7 @@ from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.config import settings
+from schemas.users import User
 
 test_db = (
     f'postgresql+asyncpg://{settings.postgres_user}:{settings.postgres_password}'
@@ -70,7 +71,7 @@ async def async_client(app: FastAPI) -> AsyncGenerator:
 
 @pytest_asyncio.fixture()
 async def async_client_authenticated(app: FastAPI) -> AsyncGenerator:
-    from routers.auth import get_current_user
+    from routers.users import get_current_user
 
     def skip_auth():
         pass
@@ -79,3 +80,21 @@ async def async_client_authenticated(app: FastAPI) -> AsyncGenerator:
 
     async with AsyncClient(app=app, base_url='http://test') as ac:
         yield ac
+
+
+@pytest.fixture()
+def user_to_create(username: str = 'shark', password: str = 'qwerty') -> User:
+    user = User(username=username)
+    user.set_password(password)
+    return user
+
+
+@pytest_asyncio.fixture()
+async def create_user(db_session: AsyncSession, user_to_create: User) -> User:
+    async def _create_user():
+        db_session.add(user_to_create)
+        await db_session.commit()
+        await db_session.refresh(user_to_create)
+        return user_to_create
+
+    return _create_user

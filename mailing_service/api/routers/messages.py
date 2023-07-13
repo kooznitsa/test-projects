@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.messages import MessageRepository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.messages import Message, MessageCreate, MessageRead, MessageUpdate
 from schemas.users import User
 

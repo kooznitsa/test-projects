@@ -7,7 +7,7 @@ from db.sessions import get_repository
 from repositories.phone_codes import PhoneCodeRepository
 from repositories.tags import TagRepository
 from repositories.mailouts import MailoutRepository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from schemas.mailouts import Mailout, MailoutCreate, MailoutRead, MailoutUpdate

@@ -6,7 +6,7 @@ from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
 from repositories.customers import CustomerRepository
 from repositories.tags import TagRepository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from schemas.users import User

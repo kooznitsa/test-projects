@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 
 from db.errors import EntityDoesNotExist
 from db.sessions import get_repository
-from routers.auth import get_current_user
+from routers.users import get_current_user
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from repositories.tags import TagRepository
 from schemas.users import User
