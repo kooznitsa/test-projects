@@ -3,16 +3,26 @@ from typing import Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
+from db.errors import WrongDatetimeError
 from repositories.base import BaseRepository
 from schemas.phone_codes import PhoneCode
 from schemas.tags import Tag
 from schemas.mailouts import Mailout, MailoutRead, MailoutCreate, MailoutUpdate
 
 
+def check_time(model):
+    if (
+        model.start_time > model.finish_time
+        or model.available_start > model.available_finish
+    ):
+        raise WrongDatetimeError('Finish time before start time')
+
+
 class MailoutRepository(BaseRepository):
     model = Mailout
 
     async def create(self, model_create: MailoutCreate) -> MailoutRead:
+        check_time(model_create)
         return await self._create_not_unique(self.model, model_create)
 
     async def list(
@@ -35,6 +45,7 @@ class MailoutRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: MailoutUpdate) -> Optional[MailoutRead]:
+        check_time(model_update)
         return await super().update(self.model, model_id, model_update)
 
     async def delete_mailout_tag(self, model_id: int, tag_id: int) -> Optional[MailoutRead]:

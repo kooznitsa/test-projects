@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from starlette import status
 
 from db.config import settings
-from db.errors import PhoneLengthError, TimezoneError
+from db.errors import PhoneLengthError, TimezoneError, WrongDatetimeError
 from db.sample_data import add_sample_data
 from db.sessions import engine
 from routers import auth, phone_codes, timezones, tags, customers, mailouts, messages, web
@@ -68,6 +68,14 @@ async def timezone_exception_handler(request: Request, exc: TimezoneError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={'message': 'Timezone is not in the list of timezones'},
+    )
+
+
+@app.exception_handler(WrongDatetimeError)
+async def datetime_exception_handler(request: Request, exc: WrongDatetimeError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={'message': 'Finish time before start time'},
     )
 
 

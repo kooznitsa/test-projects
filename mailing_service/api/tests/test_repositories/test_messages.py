@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -76,6 +77,7 @@ async def test_update_message(db_session: AsyncSession):
     new_customer_id = 1
 
     repository, _, db_message = await create_message(db_session)
+    time.sleep(5)
 
     update_message = await repository.update(
         model_id=db_message.id,
@@ -88,6 +90,7 @@ async def test_update_message(db_session: AsyncSession):
 
     assert update_message.id == db_message.id
     assert update_message.text_message == new_text_message
+    assert update_message.status == StatusEnum.updated
     assert update_message.mailout_id == new_mailout_id
     assert update_message.customer_id == new_customer_id
 

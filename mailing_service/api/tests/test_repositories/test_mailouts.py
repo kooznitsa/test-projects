@@ -4,7 +4,7 @@ import random
 import pytest
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from db.errors import EntityDoesNotExist
+from db.errors import EntityDoesNotExist, WrongDatetimeError
 from repositories.phone_codes import PhoneCodeRepository
 from repositories.tags import TagRepository
 from repositories.mailouts import MailoutRepository
@@ -13,17 +13,31 @@ from schemas.tags import TagCreate
 from schemas.mailouts import Mailout, MailoutCreate, MailoutUpdate
 
 
-async def create_mailout(db_session: AsyncSession):
-    mailout_repo = MailoutRepository(db_session)
-    tag_repo = TagRepository(db_session)
-    phone_code_repo = PhoneCodeRepository(db_session)
-
-    mailout = MailoutCreate(
+def get_right_mailout_create():
+    return MailoutCreate(
         start_time=datetime(2023, 7, 12),
         finish_time=datetime(2023, 7, 13),
         available_start=time(9, 0, 0),
         available_finish=time(18, 0, 0)
     )
+
+
+def get_wrong_mailout_create():
+    return MailoutCreate(
+        start_time=datetime(2023, 7, 13),
+        finish_time=datetime(2023, 7, 12),
+        available_start=time(9, 0, 0),
+        available_finish=time(18, 0, 0)
+    )
+
+
+async def create_mailout(
+    db_session: AsyncSession,
+    mailout: MailoutCreate = get_right_mailout_create(),
+):
+    mailout_repo = MailoutRepository(db_session)
+    tag_repo = TagRepository(db_session)
+    phone_code_repo = PhoneCodeRepository(db_session)
 
     db_mailout = await mailout_repo.create(mailout)
 
@@ -44,6 +58,11 @@ async def create_mailout(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_create_mailout(db_session: AsyncSession):
+    with pytest.raises(WrongDatetimeError):
+        _, mailout, db_mailout = await create_mailout(
+            db_session, get_wrong_mailout_create()
+        )
+
     _, mailout, db_mailout = await create_mailout(db_session)
 
     assert db_mailout.start_time == mailout.start_time
@@ -83,12 +102,12 @@ async def test_get_mailout_by_id_not_found(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_update_mailout(db_session: AsyncSession):
+    repository, _, db_mailout = await create_mailout(db_session)
+
     new_start_time = datetime(2024, 7, 12)
     new_finish_time = datetime(2024, 7, 13)
     new_available_start = time(8, 0, 0)
     new_available_finish = time(19, 0, 0)
-
-    repository, _, db_mailout = await create_mailout(db_session)
 
     update_mailout = await repository.update(
         model_id=db_mailout.id,

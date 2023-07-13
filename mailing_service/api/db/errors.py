@@ -16,3 +16,8 @@ class TimezoneError(Exception):
 class UserCredentialsError(Exception):
     """Raised when username or password are incorrect."""
     pass
+
+
+class WrongDatetimeError(Exception):
+    """Raised when finish time is less than start time."""
+    pass

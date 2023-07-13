@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from db.errors import EntityDoesNotExist
 from repositories.base import BaseRepository
-from schemas.base import StatusEnum
+from schemas.base import StatusEnum, TimeStampModel
 from schemas.customers import Customer
 from schemas.mailouts import Mailout
 from schemas.messages import Message, MessageCreate, MessageRead, MessageUpdate
@@ -47,7 +47,7 @@ class MessageRepository(BaseRepository):
                 setattr(item, key, value)
 
             setattr(item, 'status', StatusEnum.updated)
-            setattr(item, 'created_at', datetime.now())
+            setattr(item, 'created_at', datetime.utcnow())
 
             await self._add_to_db(item)
             return await self._get_instance(self.model, model_id)
