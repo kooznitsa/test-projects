@@ -17,6 +17,10 @@ To integrate with the project under development in this task, there is an extern
 - An external service that receives sent messages can process a request for a long time, respond with incorrect data, or not accept requests at all for some time. It is necessary to implement the correct handling of such errors. Problems with the external service should not affect the stability of the developed mailing service.
 - If for some reason we did not have time to send all the messages, no messages should be delivered to customers after this time.
 
+## Tech stack
+
+<img src="https://img.shields.io/badge/FastAPI-fc884d?style=for-the-badge&logo=fastapi&logoColor=black"/> <img src="https://img.shields.io/badge/Pytest-fc884d?style=for-the-badge&logo=Pytest&logoColor=black"/> <img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/> <img src="https://img.shields.io/badge/Docker-9a7b4d?style=for-the-badge&logo=Docker&logoColor=black"/>
+
 ## Tasks
 
 - [x] API Dockerization.
@@ -99,25 +103,8 @@ To integrate with the project under development in this task, there is an extern
 
 ## Commands
 
-Create network so that Docker Compose can work:
-```
-docker network create my-net
-```
-
-Start the containers:
-```
-docker-compose up -d --build
-```
-
-Stop the containers:
-```docker-compose down```
-
-Run tests:
-```
-docker exec -it fastapi_service poetry run pytest
-```
-
-Run tests and get a coverage report:
-```
-docker exec -it fastapi_service poetry run pytest --cov
-```
+- Create network so that Docker Compose can work: ```docker network create my-net```
+- Start the containers: ```docker-compose up -d --build```
+- Stop the containers: ```docker-compose down```
+- Run tests: ```docker exec -it fastapi_service poetry run pytest```
+- Run tests and get a coverage report: ```docker exec -it fastapi_service poetry run pytest --cov```
