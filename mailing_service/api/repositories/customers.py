@@ -66,3 +66,9 @@ class CustomerRepository(BaseRepository):
 
     async def delete_customer_tag(self, model_id: int, tag_id: int) -> Optional[CustomerRead]:
         return await super().delete_model_tag(self.model, model_id, Tag, tag_id)
+
+    async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
+        raise NotImplementedError
+
+    async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
+        raise NotImplementedError

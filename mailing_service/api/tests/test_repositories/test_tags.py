@@ -1,7 +1,6 @@
 import random
 
 import pytest
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.errors import EntityDoesNotExist
 from repositories.tags import TagRepository
@@ -10,7 +9,7 @@ from schemas.customers import Customer
 from tests.test_repositories.test_customers import create_customer
 
 
-async def create_tag(db_session: AsyncSession):
+async def create_tag(db_session):
     _, _, db_customer = await create_customer(db_session)
 
     repository = TagRepository(db_session)
@@ -21,14 +20,14 @@ async def create_tag(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_create_tag(db_session: AsyncSession):
+async def test_create_tag(db_session):
     _, tag, db_tag = await create_tag(db_session)
 
     assert db_tag.tag == tag.tag
 
 
 @pytest.mark.asyncio
-async def test_get_tags(db_session: AsyncSession):
+async def test_get_tags(db_session):
     repository, tag, db_tag = await create_tag(db_session)
 
     db_tags = await repository.list(model=Tag)
@@ -37,7 +36,7 @@ async def test_get_tags(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_tag_by_id(db_session: AsyncSession):
+async def test_get_tag_by_id(db_session):
     repository, tag, db_tag = await create_tag(db_session)
 
     found_tag = await repository.get(model_id=db_tag.id)
@@ -46,7 +45,7 @@ async def test_get_tag_by_id(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_tag_by_id_not_found(db_session: AsyncSession):
+async def test_get_tag_by_id_not_found(db_session):
     repository = TagRepository(db_session)
 
     with pytest.raises(expected_exception=EntityDoesNotExist):
@@ -54,7 +53,7 @@ async def test_get_tag_by_id_not_found(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_update_tag(db_session: AsyncSession):
+async def test_update_tag(db_session):
     new_tag = 'Tag'
     repository, _, db_tag = await create_tag(db_session)
 
@@ -68,7 +67,7 @@ async def test_update_tag(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_delete_tag(db_session: AsyncSession):
+async def test_delete_tag(db_session):
     repository, _, db_tag = await create_tag(db_session)
 
     delete_tag = await repository.delete(model_id=db_tag.id, model=Tag)

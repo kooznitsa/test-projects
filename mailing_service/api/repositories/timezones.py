@@ -19,7 +19,7 @@ class TimezoneRepository(BaseRepository):
         await self._add_to_db(result)
         return result
 
-    async def list(self, limit: int = 10, offset: int = 0) -> list[TimezoneRead]:
+    async def list(self, limit: int = 50, offset: int = 0) -> list[TimezoneRead]:
         return await super().list(self.model, limit, offset)
 
     async def get(self, model_id: int) -> Optional[TimezoneRead]:
@@ -29,3 +29,9 @@ class TimezoneRepository(BaseRepository):
         if model_update.timezone not in zoneinfo.available_timezones():
             raise TimezoneError
         return await super().update(self.model, model_id, model_update)
+
+    async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
+        raise NotImplementedError
+
+    async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
+        raise NotImplementedError

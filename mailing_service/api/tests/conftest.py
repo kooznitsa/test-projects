@@ -83,9 +83,9 @@ async def async_client_authenticated(app: FastAPI) -> AsyncGenerator:
 
 
 @pytest.fixture()
-def user_to_create(username: str = 'shark', password: str = 'qwerty') -> User:
-    user = User(username=username)
-    user.set_password(password)
+def user_to_create() -> User:
+    user = User(username='shark')
+    user.set_password('qwerty')
     return user
 
 

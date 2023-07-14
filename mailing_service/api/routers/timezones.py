@@ -33,7 +33,7 @@ async def create_timezone(
     name='get_timezones',
 )
 async def get_timezones(
-    limit: int = Query(default=10, lte=100),
+    limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: TimezoneRepository = Depends(get_repository(TimezoneRepository))
 ) -> list[Optional[TimezoneRead]]:

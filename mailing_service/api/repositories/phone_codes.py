@@ -39,7 +39,7 @@ class PhoneCodeRepository(BaseRepository):
         await self.session.refresh(result)
         return result
 
-    async def list(self, limit: int = 10, offset: int = 0) -> list[PhoneCodeRead]:
+    async def list(self, limit: int = 50, offset: int = 0) -> list[PhoneCodeRead]:
         return await super().list(self.model, limit, offset)
 
     async def get(self, model_id: int) -> Optional[PhoneCodeRead]:
@@ -47,3 +47,9 @@ class PhoneCodeRepository(BaseRepository):
 
     async def update(self, model_id: int, model_update: PhoneCodeUpdate) -> Optional[PhoneCodeRead]:
         return await super().update(self.model, model_id, model_update)
+
+    async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
+        raise NotImplementedError
+
+    async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
+        raise NotImplementedError

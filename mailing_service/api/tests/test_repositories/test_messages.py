@@ -2,7 +2,6 @@ import random
 import time
 
 import pytest
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.errors import EntityDoesNotExist
 from repositories.messages import MessageRepository
@@ -12,7 +11,7 @@ from tests.test_repositories.test_customers import create_customer
 from tests.test_repositories.test_mailouts import create_mailout
 
 
-async def create_message(db_session: AsyncSession):
+async def create_message(db_session):
     _, _, db_mailout = await create_mailout(db_session)
     _, _, db_customer = await create_customer(db_session)
 
@@ -30,7 +29,7 @@ async def create_message(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_create_message(db_session: AsyncSession):
+async def test_create_message(db_session):
     _, message, db_message = await create_message(db_session)
 
     assert db_message.text_message == message.text_message
@@ -41,7 +40,7 @@ async def test_create_message(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_messages(db_session: AsyncSession):
+async def test_get_messages(db_session):
     repository, message, db_message = await create_message(db_session)
 
     db_messages = await repository.list()
@@ -54,7 +53,7 @@ async def test_get_messages(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_message_by_id(db_session: AsyncSession):
+async def test_get_message_by_id(db_session):
     repository, _, db_message = await create_message(db_session)
 
     found_message = await repository.get(model_id=db_message.id)
@@ -63,7 +62,7 @@ async def test_get_message_by_id(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_message_by_id_not_found(db_session: AsyncSession):
+async def test_get_message_by_id_not_found(db_session):
     repository = MessageRepository(db_session)
 
     with pytest.raises(expected_exception=EntityDoesNotExist):
@@ -71,7 +70,7 @@ async def test_get_message_by_id_not_found(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_update_message(db_session: AsyncSession):
+async def test_update_message(db_session):
     new_text_message = 'Test message'
     new_mailout_id = 1
     new_customer_id = 1
@@ -96,7 +95,7 @@ async def test_update_message(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_delete_message(db_session: AsyncSession):
+async def test_delete_message(db_session):
     repository, _, db_message = await create_message(db_session)
 
     delete_message = await repository.delete(model_id=db_message.id)

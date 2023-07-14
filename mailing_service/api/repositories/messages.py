@@ -61,3 +61,9 @@ class MessageRepository(BaseRepository):
             return await self._get_instance(self.model, model_id)
         else:
             raise EntityDoesNotExist
+
+    async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
+        raise NotImplementedError
+
+    async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
+        raise NotImplementedError

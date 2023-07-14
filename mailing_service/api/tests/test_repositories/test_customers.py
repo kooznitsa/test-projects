@@ -1,7 +1,6 @@
 import random
 
 import pytest
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.errors import EntityDoesNotExist
 from repositories.phone_codes import PhoneCodeRepository
@@ -14,7 +13,7 @@ from schemas.tags import TagCreate
 from schemas.customers import Customer, CustomerCreate, CustomerUpdate
 
 
-async def create_customer(db_session: AsyncSession):
+async def create_customer(db_session):
     phone_code_repo = PhoneCodeRepository(db_session)
     timezone_repo = TimezoneRepository(db_session)
     tag_repo = TagRepository(db_session)
@@ -42,7 +41,7 @@ async def create_customer(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_create_customer(db_session: AsyncSession):
+async def test_create_customer(db_session):
     _, customer, db_customer = await create_customer(db_session)
 
     assert db_customer.country_code == customer.country_code
@@ -52,7 +51,7 @@ async def test_create_customer(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_customers(db_session: AsyncSession):
+async def test_get_customers(db_session):
     repository, customer, db_customer = await create_customer(db_session)
 
     db_customers = await repository.list()
@@ -64,7 +63,7 @@ async def test_get_customers(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_customer_by_id(db_session: AsyncSession):
+async def test_get_customer_by_id(db_session):
     repository, _, db_customer = await create_customer(db_session)
 
     found_customer = await repository.get(model_id=db_customer.id)
@@ -73,7 +72,7 @@ async def test_get_customer_by_id(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_customer_by_id_not_found(db_session: AsyncSession):
+async def test_get_customer_by_id_not_found(db_session):
     repository = CustomerRepository(db_session)
 
     with pytest.raises(expected_exception=EntityDoesNotExist):
@@ -81,7 +80,7 @@ async def test_get_customer_by_id_not_found(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_update_customer(db_session: AsyncSession):
+async def test_update_customer(db_session):
     new_country_code = random.randint(1, 9)
     new_phone_code_id = 1
     new_phone = random.randint(1111111, 9999999)
@@ -107,7 +106,7 @@ async def test_update_customer(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_delete_customer(db_session: AsyncSession):
+async def test_delete_customer(db_session):
     repository, _, db_customer = await create_customer(db_session)
 
     delete_customer = await repository.delete(model_id=db_customer.id, model=Customer)
@@ -118,7 +117,7 @@ async def test_delete_customer(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_delete_customer_tag(db_session: AsyncSession):
+async def test_delete_customer_tag(db_session):
     repository, _, db_customer = await create_customer(db_session)
 
     repository.delete_customer_tag(model_id=1, tag_id=1)

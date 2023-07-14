@@ -41,6 +41,6 @@ async def login_user(
         return await repository.login(form_data)
     except UserCredentialsError:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail='Incorrect username or password',
         )

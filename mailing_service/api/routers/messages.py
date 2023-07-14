@@ -39,7 +39,7 @@ async def create_message(
     name='get_messages',
 )
 async def get_messages(
-    limit: int = Query(default=10, lte=100),
+    limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: MessageRepository = Depends(get_repository(MessageRepository))
 ) -> list[Optional[MessageRead]]:

@@ -27,7 +27,7 @@ class UserRepository(BaseRepository):
         else:
             raise UserCredentialsError
 
-    def create_access_token(self, data: dict, expires_delta: timedelta | None = None):
+    def _create_access_token(self, data: dict, expires_delta: timedelta | None = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -57,9 +57,24 @@ class UserRepository(BaseRepository):
         user = user.first()
         if user and user.verify_password(form_data.password):
             access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            access_token = self.create_access_token(
+            access_token = self._create_access_token(
                 data={'sub': user.username}, expires_delta=access_token_expires
             )
             return {'access_token': access_token, 'token_type': 'bearer'}
         else:
             raise UserCredentialsError
+
+    async def list(self, model, limit: int, offset: int = 0):
+        raise NotImplementedError
+
+    async def update(self, model, model_id: int, model_update):
+        raise NotImplementedError
+
+    async def delete(self, model, model_id: int) -> None:
+        raise NotImplementedError
+
+    async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
+        raise NotImplementedError
+
+    async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
+        raise NotImplementedError

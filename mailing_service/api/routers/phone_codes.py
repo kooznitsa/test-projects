@@ -33,7 +33,7 @@ async def create_phone_code(
     name='get_phone_codes',
 )
 async def get_phone_codes(
-    limit: int = Query(default=10, lte=100),
+    limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: PhoneCodeRepository = Depends(get_repository(PhoneCodeRepository))
 ) -> list[Optional[PhoneCodeRead]]:
