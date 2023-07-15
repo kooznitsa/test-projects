@@ -5,10 +5,13 @@ from sqlmodel import Field, SQLModel
 
 
 class StatusEnum(str, Enum):
-    created = 'created'
-    sent = 'sent'
-    updated = 'updated'
-    deleted = 'deleted'
+    created = 'Created'
+    updated = 'Updated'
+    deleted = 'Deleted'
+    pending = 'Pending'
+    sent = 'Sent'
+    failed = 'Failed'
+    timed_out = 'Timed out'
 
 
 class TimeStampModel(SQLModel):

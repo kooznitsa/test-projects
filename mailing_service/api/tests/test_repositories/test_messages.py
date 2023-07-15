@@ -101,3 +101,26 @@ async def test_delete_message(db_session):
     delete_message = await repository.delete(model_id=db_message.id)
 
     assert delete_message.status == StatusEnum.deleted
+
+
+@pytest.mark.asyncio
+async def test_get_general_stats(db_session):
+    repository, _, db_message = await create_message(db_session)
+
+    stats = await repository.get_general_stats()
+
+    assert stats[0].status == StatusEnum.created
+    assert stats[0].count == 1
+
+
+@pytest.mark.asyncio
+async def test_get_detailed_stats(db_session):
+    repository, _, db_message = await create_message(db_session)
+
+    stats = await repository.get_detailed_stats(
+        model_id=db_message.mailout_id,
+        status=db_message.status,
+    )
+
+    assert stats[0].status == StatusEnum.created
+    assert stats[0].count == 1

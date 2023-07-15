@@ -4,6 +4,7 @@ from sqlmodel import Session
 from sqlalchemy import select
 
 from db.sessions import engine
+from schemas.base import StatusEnum
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate
 from schemas.timezones import Timezone, TimezoneCreate
 from schemas.tags import Tag, TagCreate
@@ -112,14 +113,34 @@ def create_entries(session):
     mailout.phone_codes.extend([phone_code1, phone_code2, phone_code3])
     add_to_db(session, mailout)
 
-    message = Message.from_orm(
+    message1 = Message.from_orm(
         MessageCreate(
-            text_message='Hello world',
+            text_message='Test message 1',
             mailout_id=1,
             customer_id=1,
         )
     )
-    add_to_db(session, message)
+    add_to_db(session, message1)
+
+    message2 = Message.from_orm(
+        MessageCreate(
+            text_message='Test message 2',
+            status=StatusEnum.pending,
+            mailout_id=1,
+            customer_id=2,
+        )
+    )
+    add_to_db(session, message2)
+
+    message3 = Message.from_orm(
+        MessageCreate(
+            text_message='Test message 3',
+            status=StatusEnum.pending,
+            mailout_id=1,
+            customer_id=2,
+        )
+    )
+    add_to_db(session, message3)
 
     user = User(username='shark')
     user.set_password('qwerty')

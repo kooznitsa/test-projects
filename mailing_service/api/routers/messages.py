@@ -47,6 +47,30 @@ async def get_messages(
 
 
 @router.get(
+    '/stats',
+    status_code=status.HTTP_200_OK,
+    name='get_general_stats',
+)
+async def get_general_stats(
+    repository: MessageRepository = Depends(get_repository(MessageRepository))
+) -> list:
+    return await repository.get_general_stats()
+
+
+@router.get(
+    '/stats/{mailout_id}',
+    status_code=status.HTTP_200_OK,
+    name='get_detailed_stats',
+)
+async def get_detailed_stats(
+    mailout_id: int,
+    status: str | None = Query(default=None),
+    repository: MessageRepository = Depends(get_repository(MessageRepository))
+) -> list:
+    return await repository.get_detailed_stats(model_id=mailout_id, status=status)
+
+
+@router.get(
     '/{message_id}',
     response_model=MessageRead,
     status_code=status.HTTP_200_OK,

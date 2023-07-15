@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from sqlalchemy import func
 from sqlmodel import select
 
 from db.errors import EntityDoesNotExist
@@ -67,3 +68,36 @@ class MessageRepository(BaseRepository):
 
     async def delete_model_phone_code(self, model, model_id: int, phone_code_model, phone_code_id: int):
         raise NotImplementedError
+
+    async def get_general_stats(self):
+        query = (
+            select(
+                self.model.status.label('status'),
+                func.count(self.model.id).label('count')
+            )
+            .group_by(self.model.status)
+            .order_by(func.count(self.model.id).desc())
+        )
+        results = await self.session.exec(query)
+        return results.all()
+
+    async def get_detailed_stats(self, model_id: int, status: StatusEnum = None):
+        query = (
+            select(
+                self.model.status.label('status'),
+                func.count(self.model.id).label('count')
+            )
+            .where(self.model.mailout_id == model_id)
+        )
+
+        if status:
+            query = query.where(self.model.status == status)
+
+        query = (
+            query
+            .group_by(self.model.status)
+            .order_by(func.count(self.model.id).desc())
+        )
+
+        results = await self.session.exec(query)
+        return results.all()

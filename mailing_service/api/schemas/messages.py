@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 class MessageBase(SQLModel):
     text_message: str
+    status: StatusEnum = Field(default=StatusEnum.created, index=True)
     mailout_id: int | None = Field(default=None, foreign_key='mailouts.id')
     customer_id: int | None = Field(default=None, foreign_key='customers.id')
 
@@ -18,6 +19,7 @@ class MessageBase(SQLModel):
         schema_extra = {
             "example": {
                 "text_message": "Test message",
+                "status": "Created",
                 "mailout_id": 1,
                 "customer_id": 1
             }
@@ -28,7 +30,6 @@ class Message(MessageBase, TimeStampModel, table=True):
     __tablename__: str = 'messages'
 
     id: int | None = Field(primary_key=True, default=None)
-    status: StatusEnum = StatusEnum.created
 
     mailout: 'Mailout' = Relationship(back_populates='messages')
     customer: 'Customer' = Relationship(back_populates='messages')
@@ -40,10 +41,10 @@ class MessageCreate(MessageBase):
 
 class MessageRead(MessageBase, TimeStampModel):
     id: int
-    status: str
 
 
 class MessageUpdate(SQLModel):
     text_message: Optional[str]
+    status: Optional[str] = None
     mailout_id: int | None = None
     customer_id: int | None = None

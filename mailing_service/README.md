@@ -32,19 +32,19 @@ To integrate with the project under development in this task, there is an extern
 - [x] Authentication using JWT.
 - [x] Clear documentation on running the project with all its dependencies.
 - [x] API documentation for integration with the developed service. Description of implemented methods in OpenAPI format.
-- [ ] Obtaining general statistics on the created mailouts and the number of sent messages on them, grouped by status.
-- [ ] Obtaining detailed statistics of sent messages for a specific mailout.
+- [x] Obtaining general statistics on the created mailouts and the number of sent messages on them, grouped by status.
+- [x] Obtaining detailed statistics of sent messages for a specific mailout.
 - [ ] Processing active mailouts and sending messages to customers.
-- [ ] Provide automated build/testing with GitLab CI.
-- [ ] Write configuration files (deployment, ingress, etc.) to run the project in Kubernetes and describe how to apply them to a running cluster.
-- [ ] Implement an administrator Web UI to manage mailouts and get statistics on sent messages.
-- [ ] Provide integration with an external OAuth2 authorization service for the administrative interface. Example: https://auth0.com.
-- [ ] Implement an additional service that sends statistics on processed mailouts to an email address once a day.
 - [ ] Implement the return of metrics in the prometheus format and document the endpoints and exported metrics.
 - [ ] Provide detailed logging at all stages of request processing, so that during operation it is possible to find all information on:
   - mailout id: all logs for a specific mailout (both API requests and external requests to send specific messages);
   - message id: for a specific message (all requests and responses from an external service, all processing of a specific message);
   - customer id: any operations that are associated with a specific customer (adding, editing, sending a message, etc.).
+- [ ] Implement an additional service that sends statistics on processed mailouts to an email address once a day.
+- [ ] Provide automated build/testing with GitLab CI.
+- [ ] Write configuration files (deployment, ingress, etc.) to run the project in Kubernetes and describe how to apply them to a running cluster.
+- [ ] Implement an administrator Web UI to manage mailouts and get statistics on sent messages.
+- [ ] Provide integration with an external OAuth2 authorization service for the administrative interface. Example: https://auth0.com.
 
 ## Database structure
 
@@ -84,7 +84,8 @@ To integrate with the project under development in this task, there is an extern
 | GET                | /{message_id}                             | Get mailout by ID         |
 | PUT                | /{message_id}                             | Change mailout by ID      |
 | DELETE             | /{message_id}                             | Delete mailout by ID      |
-| GET                | /stats                                    | Get messages stats        |
+| GET                | /stats                                    | Get general statistics    |
+| GET                | /stats/{mailout_id}                       | Get detailed statistics   |
 | **---PHONE CODES** | **/api/phone_codes/**                     |                           |
 | POST               | /                                         | Add phone code            |
 | GET                | /                                         | Get phone codes           |

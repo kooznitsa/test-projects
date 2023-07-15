@@ -118,3 +118,28 @@ async def test_get_message_paginated(async_client, async_client_authenticated):
 
     response = await async_client.get('/api/messages/')
     assert len(response.json()) == 4
+
+
+@pytest.mark.asyncio
+async def test_get_general_stats(async_client_authenticated, async_client):
+    await create_message(async_client_authenticated)
+
+    response = await async_client.get('/api/messages/stats')
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()[0]['status'] == StatusEnum.created
+    assert response.json()[0]['count'] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_detailed_stats(async_client_authenticated, async_client):
+    _, response_create = await create_message(async_client_authenticated)
+
+    response = await async_client.get(
+        f"/api/messages/stats/{response_create.json()['mailout_id']}"
+        f"?status={response_create.json()['status']}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()[0]['status'] == StatusEnum.created
+    assert response.json()[0]['count'] == 1
