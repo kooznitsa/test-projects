@@ -6,7 +6,7 @@ from fastapi import status
 
 async def create_phone_code(
     async_client_authenticated,
-    pc: int = random.randint(100, 999),
+    pc: str = str(random.randint(100, 999)),
 ):
     phone_code = {'phone_code': pc}
     response = await async_client_authenticated.post(
@@ -18,7 +18,7 @@ async def create_phone_code(
 
 async def create_phone_codes(async_client_authenticated, qty: int = 1):
     return [
-        await create_phone_code(async_client_authenticated, pc)
+        await create_phone_code(async_client_authenticated, str(pc))
         for pc in random.sample(range(100, 999), qty)
     ]
 
@@ -68,7 +68,7 @@ async def test_delete_phone_code(async_client_authenticated):
 @pytest.mark.asyncio
 async def test_update_phone_code(async_client_authenticated):
     phone_code, response_create = await create_phone_code(async_client_authenticated)
-    new_phone_code = random.randint(100, 999)
+    new_phone_code = str(random.randint(100, 999))
 
     response = await async_client_authenticated.put(
         f"/api/phone_codes/{response_create.json()['id']}",
@@ -98,8 +98,8 @@ async def test_get_phone_code_paginated(async_client, async_client_authenticated
 
 @pytest.mark.asyncio
 async def test_not_unique_phone_codes(async_client, async_client_authenticated):
-    await async_client_authenticated.post('/api/phone_codes/', json={'phone_code': 980})
-    await async_client_authenticated.post('/api/phone_codes/', json={'phone_code': 980})
+    await async_client_authenticated.post('/api/phone_codes/', json={'phone_code': '980'})
+    await async_client_authenticated.post('/api/phone_codes/', json={'phone_code': '980'})
 
     response = await async_client.get('/api/phone_codes/')
     assert len(response.json()) == 1

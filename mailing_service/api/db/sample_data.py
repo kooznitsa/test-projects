@@ -63,9 +63,9 @@ def upsert_tag(session, value):
 
 
 def create_entries(session):
-    phone_code1 = upsert_phone_code(session, 925)
-    phone_code2 = upsert_phone_code(session, 980)
-    phone_code3 = upsert_phone_code(session, 967)
+    phone_code1 = upsert_phone_code(session, '925')
+    phone_code2 = upsert_phone_code(session, '980')
+    phone_code3 = upsert_phone_code(session, '967')
 
     timezone1 = upsert_timezone(session, 'Europe/Moscow')
     timezone2 = upsert_timezone(session, 'Europe/Belgrade')
@@ -78,7 +78,7 @@ def create_entries(session):
     customer1 = Customer.from_orm(
         CustomerCreate(
             country_code=7,
-            phone=1234567,
+            phone='1234567',
         ),
         update={
             'phone_code_id': phone_code1.id,
@@ -91,7 +91,7 @@ def create_entries(session):
     customer2 = Customer.from_orm(
         CustomerCreate(
             country_code=7,
-            phone=4444444,
+            phone='4444444',
         ),
         update={
             'phone_code_id': phone_code2.id,

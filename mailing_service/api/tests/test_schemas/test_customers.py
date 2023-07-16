@@ -16,13 +16,3 @@ def test_customer_instance_phone_empty():
             phone_code_id=1,
             timezone_id=1,
         )
-
-
-def test_customer_instance_phone_wrong():
-    with pytest.raises(expected_exception=ValidationError):
-        CustomerCreate(
-            country_code=7,
-            phone_code_id=1,
-            phone='phone',
-            timezone_id=1,
-        )

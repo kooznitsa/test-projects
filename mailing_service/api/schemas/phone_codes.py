@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
 
 class PhoneCodeBase(SQLModel):
-    phone_code: int
+    phone_code: str
 
     class Config:
         schema_extra = {
             "example": {
-                "phone_code": 950
+                "phone_code": '950'
             }
         }
 
@@ -44,4 +44,4 @@ class PhoneCodeRead(PhoneCodeBase):
 
 
 class PhoneCodeUpdate(SQLModel):
-    phone_code: int | None = None
+    phone_code: str | None = None

@@ -35,6 +35,7 @@ To integrate with the project under development in this task, there is an extern
 - [x] Obtaining general statistics on the created mailouts and the number of sent messages on them, grouped by status.
 - [x] Obtaining detailed statistics of sent messages for a specific mailout.
 - [ ] Processing active mailouts and sending messages to customers.
+- [ ] Automatic launch of mailouts according to the schedule (once per minute) with Celery.
 - [ ] Implement the return of metrics in the prometheus format and document the endpoints and exported metrics.
 - [ ] Provide detailed logging at all stages of request processing, so that during operation it is possible to find all information on:
   - mailout id: all logs for a specific mailout (both API requests and external requests to send specific messages);
@@ -57,6 +58,7 @@ To integrate with the project under development in this task, there is an extern
 | **---GENERAL**     | /                                         |                           |
 | GET                | /                                         | Root                      |
 | GET                | /docs                                     | Documentation             |
+| GET                | /metrics                                  | prometheus_client metrics |
 | GET                | /api                                      | Home                      |
 | POST               | /auth/token                               | Login                     |
 | POST               | /api/search                               | Search customer           |
@@ -86,6 +88,7 @@ To integrate with the project under development in this task, there is an extern
 | DELETE             | /{message_id}                             | Delete mailout by ID      |
 | GET                | /stats                                    | Get general statistics    |
 | GET                | /stats/{mailout_id}                       | Get detailed statistics   |
+| GET                | /{message_id}/start                       | Start mailout             |
 | **---PHONE CODES** | **/api/phone_codes/**                     |                           |
 | POST               | /                                         | Add phone code            |
 | GET                | /                                         | Get phone codes           |

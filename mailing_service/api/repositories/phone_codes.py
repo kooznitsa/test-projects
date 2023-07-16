@@ -1,11 +1,18 @@
+import re
 from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from db.errors import EntityDoesNotExist
+from db.errors import EntityDoesNotExist, PhoneCodeError
 from repositories.base import BaseRepository
 from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, PhoneCodeUpdate
+
+
+def check_phone_code(phone_code):
+    regex = r'^[0-9]{3}$'
+    if not re.search(regex, phone_code, re.I):
+        raise PhoneCodeError
 
 
 class PhoneCodeRepository(BaseRepository):
@@ -17,6 +24,8 @@ class PhoneCodeRepository(BaseRepository):
         parent_model=None,
         model_id=None,
     ) -> PhoneCodeRead:
+        check_phone_code(model_create.phone_code)
+
         phone_code_query = (
             select(self.model)
             .where(self.model.phone_code == model_create.phone_code)
@@ -46,6 +55,7 @@ class PhoneCodeRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def update(self, model_id: int, model_update: PhoneCodeUpdate) -> Optional[PhoneCodeRead]:
+        check_phone_code(model_update.phone_code)
         return await super().update(self.model, model_id, model_update)
 
     async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):

@@ -41,8 +41,8 @@ async def create_customer(
     name='get_customers',
 )
 async def get_customers(
-    tag: str | None = Query(default=None),
-    phone_code: int | None = Query(default=None),
+    tag: Optional[list[str]] = Query(default=None),
+    phone_code: str | None = Query(default=None),
     limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: CustomerRepository = Depends(get_repository(CustomerRepository))

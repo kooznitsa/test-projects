@@ -9,7 +9,7 @@ from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeUpdate
 
 async def create_phone_code(db_session):
     repository = PhoneCodeRepository(db_session)
-    phone_code = PhoneCodeCreate(phone_code=980)
+    phone_code = PhoneCodeCreate(phone_code='980')
     db_phone_code = await repository.create(phone_code)
 
     return repository, phone_code, db_phone_code
@@ -50,7 +50,7 @@ async def test_get_phone_code_by_id_not_found(db_session):
 
 @pytest.mark.asyncio
 async def test_update_phone_code(db_session):
-    new_phone_code = random.randint(100, 999)
+    new_phone_code = str(random.randint(100, 999))
     repository, _, db_phone_code = await create_phone_code(db_session)
 
     update_phone_code = await repository.update(

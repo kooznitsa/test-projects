@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import make_asgi_app
 from sqlmodel import SQLModel, Session
 from starlette.responses import JSONResponse
 from starlette import status
 
 from db.config import settings
-from db.errors import PhoneLengthError, TimezoneError, WrongDatetimeError
+from db.errors import PhoneCodeError, PhoneError, TimezoneError, WrongDatetimeError
 from db.sample_data import add_sample_data
 from db.sessions import engine
 from routers import users, phone_codes, timezones, tags, customers, mailouts, messages, web
@@ -34,6 +35,9 @@ routers = (
 for router, tags in routers:
     app.include_router(router, prefix=settings.api_prefix, tags=[tags])
 
+metrics_app = make_asgi_app()
+app.mount('/metrics', metrics_app)
+
 origins = [
     'http://localhost:8000',
     'http://localhost:8080',
@@ -55,11 +59,19 @@ async def init_tables():
     add_sample_data()
 
 
-@app.exception_handler(PhoneLengthError)
-async def phone_length_exception_handler(request: Request, exc: PhoneLengthError):
+@app.exception_handler(PhoneCodeError)
+async def phone_code_exception_handler(request: Request, exc: PhoneCodeError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={'message': 'Phone length is not equal to 7 digits'},
+        content={'message': 'Phone code is not a string of 3 digits'},
+    )
+
+
+@app.exception_handler(PhoneError)
+async def phone_exception_handler(request: Request, exc: PhoneError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={'message': 'Phone is not a string of 7 digits'},
     )
 
 

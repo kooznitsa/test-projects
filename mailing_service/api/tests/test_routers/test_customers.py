@@ -7,7 +7,7 @@ from fastapi import status
 async def create_customer(async_client_authenticated):
     phone_code_response = await async_client_authenticated.post(
         '/api/phone_codes/',
-        json={'phone_code': 980}
+        json={'phone_code': '980'}
     )
     timezone_response = await async_client_authenticated.post(
         '/api/timezones/',
@@ -17,7 +17,7 @@ async def create_customer(async_client_authenticated):
     customer = {
         'country_code': random.randint(1, 9),
         'phone_code_id': phone_code_response.json()['id'],
-        'phone': random.randint(1111111, 9999999),
+        'phone': str(random.randint(1111111, 9999999)),
         'timezone_id': timezone_response.json()['id']
     }
 
@@ -89,7 +89,7 @@ async def test_update_customer(async_client_authenticated):
 
     new_country_code = random.randint(1, 9)
     new_phone_code_id = 1
-    new_phone = random.randint(1111111, 9999999)
+    new_phone = str(random.randint(1111111, 9999999))
     new_timezone_id = 1
 
     response = await async_client_authenticated.put(

@@ -19,13 +19,13 @@ async def create_customer(db_session):
     tag_repo = TagRepository(db_session)
     customer_repo = CustomerRepository(db_session)
 
-    db_phone_code = await phone_code_repo.create(PhoneCodeCreate(phone_code=980))
+    db_phone_code = await phone_code_repo.create(PhoneCodeCreate(phone_code='980'))
     db_timezone = await timezone_repo.create(TimezoneCreate(timezone='Europe/Belgrade'))
 
     customer = CustomerCreate(
         country_code=7,
         phone_code_id=db_phone_code.id,
-        phone=9999999,
+        phone='9999999',
         timezone_id=db_timezone.id,
     )
 
@@ -83,7 +83,7 @@ async def test_get_customer_by_id_not_found(db_session):
 async def test_update_customer(db_session):
     new_country_code = random.randint(1, 9)
     new_phone_code_id = 1
-    new_phone = random.randint(1111111, 9999999)
+    new_phone = str(random.randint(1111111, 9999999))
     new_timezone_id = 1
 
     repository, _, db_customer = await create_customer(db_session)

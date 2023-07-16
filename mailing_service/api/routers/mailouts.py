@@ -37,8 +37,8 @@ async def create_mailout(
     name='get_mailouts',
 )
 async def get_mailouts(
-    tag: str | None = Query(default=None),
-    phone_code: int | None = Query(default=None),
+    tag: Optional[list[str]] = Query(default=None),
+    phone_code: Optional[list[str]] = Query(default=None),
     limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: MailoutRepository = Depends(get_repository(MailoutRepository))

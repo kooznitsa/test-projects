@@ -3,8 +3,13 @@ class EntityDoesNotExist(Exception):
     pass
 
 
-class PhoneLengthError(Exception):
-    """Raised when phone length is not equal to 7 digits."""
+class PhoneCodeError(Exception):
+    """Raised when phone code is not a string of 3 digits."""
+    pass
+
+
+class PhoneError(Exception):
+    """Raised when phone is not a string of 7 digits."""
     pass
 
 

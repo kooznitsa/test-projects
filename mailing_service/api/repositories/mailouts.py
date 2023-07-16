@@ -15,7 +15,7 @@ def check_time(model):
         model.start_time > model.finish_time
         or model.available_start > model.available_finish
     ):
-        raise WrongDatetimeError('Finish time before start time')
+        raise WrongDatetimeError
 
 
 class MailoutRepository(BaseRepository):
@@ -28,15 +28,15 @@ class MailoutRepository(BaseRepository):
     async def list(
         self,
         limit: int = 50,
-        tag: Optional[str] = None,
-        phone_code: int | None = None,
+        tag: Optional[list[str]] = None,
+        phone_code: Optional[list[str]] = None,
         offset: int = 0,
     ) -> list[MailoutRead]:
         query = select(self.model).order_by(self.model.id)
         if tag:
-            query = query.where(self.model.tags.any(Tag.tag == tag))
+            query = query.where(self.model.tags.any(Tag.tag.in_(tag)))
         if phone_code:
-            query = query.where(self.model.phone_codes.any(PhoneCode.phone_code == phone_code))
+            query = query.where(self.model.phone_codes.any(PhoneCode.phone_code.in_(phone_code)))
         query = query.offset(offset).limit(limit)
         results = await self.session.exec(query.options(selectinload('*')))
         return results.all()
