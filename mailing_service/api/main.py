@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 from sqlmodel import SQLModel, Session
@@ -6,10 +6,17 @@ from starlette.responses import JSONResponse
 from starlette import status
 
 from db.config import settings
-from db.errors import PhoneCodeError, PhoneError, TimezoneError, WrongDatetimeError
+from db.errors import (
+    PhoneCodeError, PhoneError,
+    TimezoneError, WrongDatetimeError,
+)
 from db.sample_data import add_sample_data
 from db.sessions import engine
-from routers import users, phone_codes, timezones, tags, customers, mailouts, messages, web
+from routers import (
+    users, phone_codes, timezones, tags,
+    customers, mailouts, messages, web,
+)
+from utils.logging import log_request_info
 
 app = FastAPI(
     title=settings.title,
@@ -33,7 +40,12 @@ routers = (
 )
 
 for router, tags in routers:
-    app.include_router(router, prefix=settings.api_prefix, tags=[tags])
+    app.include_router(
+        router,
+        prefix=settings.api_prefix,
+        tags=[tags],
+        dependencies=[Depends(log_request_info)],
+    )
 
 metrics_app = make_asgi_app()
 app.mount('/metrics', metrics_app)
@@ -94,6 +106,13 @@ async def datetime_exception_handler(request: Request, exc: WrongDatetimeError):
 @app.get('/')
 async def root():
     return {'Say': 'Hello!'}
+
+
+@app.middleware('http')
+async def add_cookie(request: Request, call_next):
+    response = await call_next(request)
+    response.set_cookie(key='customers_cookie', value='you_visited_the_mailing_app')
+    return response
 
 
 if __name__ == '__main__':

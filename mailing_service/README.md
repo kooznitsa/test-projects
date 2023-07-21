@@ -37,7 +37,7 @@ To integrate with the project under development in this task, there is an extern
 - [ ] Processing active mailouts and sending messages to customers.
 - [ ] Automatic launch of mailouts according to the schedule (once per minute) with Celery.
 - [ ] Implement the return of metrics in the prometheus format and document the endpoints and exported metrics.
-- [ ] Provide detailed logging at all stages of request processing, so that during operation it is possible to find all information on:
+- [x] Provide detailed logging at all stages of request processing, so that during operation it is possible to find all information on:
   - mailout id: all logs for a specific mailout (both API requests and external requests to send specific messages);
   - message id: for a specific message (all requests and responses from an external service, all processing of a specific message);
   - customer id: any operations that are associated with a specific customer (adding, editing, sending a message, etc.).

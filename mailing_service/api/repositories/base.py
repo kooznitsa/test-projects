@@ -29,6 +29,7 @@ class BaseRepository:
 
         for k, v in model_from_orm.dict(exclude_unset=True).items():
             setattr(result, k, v)
+
         return result
 
     async def _create_not_unique(self, model, model_create):
