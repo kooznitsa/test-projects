@@ -7,10 +7,14 @@ from fastapi import Request
 class LoggerConfig:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logfile = 'log_file.log'
+        self.logfile = 'utils/logs/log_file.log'
 
         self.handler_cmdline = logging.StreamHandler()
-        self.handler_file = logging.FileHandler(self.logfile)
+        self.handler_file = logging.handlers.TimedRotatingFileHandler(
+            filename=self.logfile,
+            when='m',
+            backupCount=1,
+        )
         self.handler_cmdline.setLevel(logging.DEBUG)
         self.handler_file.setLevel(logging.INFO)
 
