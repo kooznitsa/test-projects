@@ -5,15 +5,7 @@
 - Implement methods for creating a new mailout, viewing the created ones, and getting statistics on completed mailouts.
 - Implement the service itself for sending notifications to an external API. Design and develop a service that launches a mailout according to a mailing list of customers.
 
-To integrate with the project under development in this task, there is an external service that can receive requests to send messages to customers.
-
-### Mailout logic
-
-- After creating a new mailout, if the current time is greater than the start time and less than the end time, all customers that match the filter values specified in this mailout must be selected from the database and sending should be started for all these customers.
-- If a mailout is created with a start time in the future, the sending should start automatically on designated time without additional actions from the system user.
-- In the course of sending messages, statistics should be collected for each message for subsequent reporting. See Message entity above.
-- An external service that receives sent messages can process a request for a long time, respond with incorrect data, or not accept requests at all for some time. It is necessary to implement the correct handling of such errors. Problems with the external service should not affect the stability of the developed mailing service.
-- If for some reason we did not have time to send all the messages, no messages should be delivered to customers after this time.
+[Task in Russian](https://github.com/kooznitsa/test-projects/blob/main/mailing_service/task.md)
 
 ## Tech stack
 
