@@ -47,7 +47,10 @@ class MessageRepository(BaseRepository):
             for key, value in item_dict.items():
                 setattr(item, key, value)
 
-            setattr(item, 'status', StatusEnum.updated)
+            if not model_update.status:
+                setattr(item, 'status', StatusEnum.updated)
+            else:
+                setattr(item, 'status', model_update.status)
             setattr(item, 'created_at', datetime.utcnow())
 
             await self._add_to_db(item)
@@ -101,3 +104,13 @@ class MessageRepository(BaseRepository):
 
         results = await self.session.exec(query)
         return results.all()
+
+    async def start_mailout(self, model_id: int):
+        instance = await self._get_instance(self.model, model_id)
+        if instance:
+            process_mailout.delay(instance.id)
+            result = f'Mailout {instance.id} set to processing'
+            logger.info(result)
+            return result
+        else:
+            raise EntityDoesNotExist

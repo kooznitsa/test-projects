@@ -1,5 +1,4 @@
 import random
-import time
 
 import pytest
 
@@ -18,7 +17,6 @@ async def create_message(db_session):
     repository = MessageRepository(db_session)
 
     message = MessageCreate(
-        text_message='Hello world',
         mailout_id=db_mailout.id,
         customer_id=db_customer.id
     )
@@ -32,7 +30,6 @@ async def create_message(db_session):
 async def test_create_message(db_session):
     _, message, db_message = await create_message(db_session)
 
-    assert db_message.text_message == message.text_message
     assert db_message.created_at is not None
     assert db_message.status == StatusEnum.created
     assert db_message.mailout_id == message.mailout_id
@@ -45,7 +42,6 @@ async def test_get_messages(db_session):
 
     db_messages = await repository.list()
 
-    assert db_messages[0].text_message == message.text_message
     assert db_messages[0].created_at is not None
     assert db_messages[0].status == StatusEnum.created
     assert db_messages[0].mailout_id == message.mailout_id
@@ -71,24 +67,20 @@ async def test_get_message_by_id_not_found(db_session):
 
 @pytest.mark.asyncio
 async def test_update_message(db_session):
-    new_text_message = 'Test message'
     new_mailout_id = 1
     new_customer_id = 1
 
     repository, _, db_message = await create_message(db_session)
-    time.sleep(5)
 
     update_message = await repository.update(
         model_id=db_message.id,
         model_update=MessageUpdate(
-            text_message=new_text_message,
             mailout_id=new_mailout_id,
             customer_id=new_customer_id
         ),
     )
 
     assert update_message.id == db_message.id
-    assert update_message.text_message == new_text_message
     assert update_message.status == StatusEnum.updated
     assert update_message.mailout_id == new_mailout_id
     assert update_message.customer_id == new_customer_id

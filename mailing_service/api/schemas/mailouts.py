@@ -14,18 +14,23 @@ if TYPE_CHECKING:
 
 
 class MailoutBase(SQLModel):
-    start_time: datetime
-    finish_time: datetime
-    available_start: time | None = None
-    available_finish: time | None = None
+    text_message: str
+    start_at: datetime
+    finish_at: datetime
+    available_start_at: time | None = None
+    available_finish_at: time | None = None
+
+    def requires_processing(self) -> bool:
+        return self.start_at <= datetime.now() < self.finish_at
 
     class Config:
         schema_extra = {
             "example": {
-                "start_time": datetime(2023, 6, 30, 10, 0, 0),
-                "finish_time": datetime(2023, 6, 30, 11, 0, 0),
-                "available_start": time(10, 0, 0),
-                "available_finish": time(19, 0, 0)
+                "text_message": "Test message",
+                "start_at": datetime(2023, 6, 30, 10, 0, 0),
+                "finish_at": datetime(2023, 6, 30, 11, 0, 0),
+                "available_start_at": time(10, 0, 0),
+                "available_finish_at": time(19, 0, 0)
             }
         }
 
@@ -50,7 +55,8 @@ class MailoutRead(MailoutBase):
 
 
 class MailoutUpdate(SQLModel):
-    start_time: datetime | None = None
-    finish_time: datetime | None = None
-    available_start: time | None = None
-    available_finish: time | None = None
+    text_message: str | None
+    start_at: datetime | None = None
+    finish_at: datetime | None = None
+    available_start_at: time | None = None
+    available_finish_at: time | None = None

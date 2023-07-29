@@ -1,19 +1,20 @@
+from datetime import datetime
 from typing import Optional
 
-from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from db.errors import WrongDatetimeError
+from db.errors import EntityDoesNotExist, WrongDatetimeError
 from repositories.base import BaseRepository
 from schemas.phone_codes import PhoneCode
 from schemas.tags import Tag
 from schemas.mailouts import Mailout, MailoutRead, MailoutCreate, MailoutUpdate
+from services.sender.metrics import mailouts_total_created
 
 
 def check_time(model):
     if (
-        model.start_time > model.finish_time
-        or model.available_start > model.available_finish
+        model.start_at > model.finish_at
+        or model.available_start_at > model.available_finish_at
     ):
         raise WrongDatetimeError
 
@@ -23,6 +24,7 @@ class MailoutRepository(BaseRepository):
 
     async def create(self, model_create: MailoutCreate) -> MailoutRead:
         check_time(model_create)
+        mailouts_total_created.inc()
         return await self._create_not_unique(self.model, model_create)
 
     async def list(
@@ -38,8 +40,7 @@ class MailoutRepository(BaseRepository):
         if phone_code:
             query = query.where(self.model.phone_codes.any(PhoneCode.phone_code.in_(phone_code)))
         query = query.offset(offset).limit(limit)
-        results = await self.session.exec(query.options(selectinload('*')))
-        return results.all()
+        return await self.get_list(query)
 
     async def get(self, model_id: int) -> Optional[MailoutRead]:
         return await super().get(self.model, model_id)
@@ -53,6 +54,15 @@ class MailoutRepository(BaseRepository):
 
     async def delete_mailout_phone_code(self, model_id: int, phone_code_id: int) -> Optional[MailoutRead]:
         return await super().delete_model_phone_code(self.model, model_id, PhoneCode, phone_code_id)
+
+    async def select_mailout_jobs(self):
+        _now = datetime.now()
+        query = (
+            select(self.model)
+            .where(self.model.start_at <= _now)
+            .where(self.model.finish_at > _now)
+        )
+        return await self.get_list(query)
 
     async def delete_model_tag(self, model, model_id: int, tag_model, tag_id: int):
         raise NotImplementedError

@@ -1,6 +1,6 @@
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import make_asgi_app
+from prometheus_client import make_asgi_app, generate_latest, multiprocess, CollectorRegistry
 from sqlmodel import SQLModel, Session
 from starlette.responses import JSONResponse
 from starlette import status
@@ -47,9 +47,6 @@ for router, tags in routers:
         dependencies=[Depends(log_request_info)],
     )
 
-metrics_app = make_asgi_app()
-app.mount('/metrics', metrics_app)
-
 origins = [
     'http://localhost:8000',
     'http://localhost:8080',
@@ -66,6 +63,7 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def init_tables():
+    # Disable function if Celery launched
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     add_sample_data()
@@ -108,11 +106,14 @@ async def root():
     return {'Say': 'Hello!'}
 
 
-@app.middleware('http')
-async def add_cookie(request: Request, call_next):
-    response = await call_next(request)
-    response.set_cookie(key='customers_cookie', value='you_visited_the_mailing_app')
-    return response
+def make_metrics_app():
+    registry = CollectorRegistry()
+    multiprocess.MultiProcessCollector(registry)
+    return make_asgi_app(registry=registry)
+
+
+metrics_app = make_metrics_app()
+app.mount('/metrics', metrics_app)
 
 
 if __name__ == '__main__':

@@ -6,10 +6,11 @@ from fastapi import status
 
 async def create_mailout(async_client_authenticated):
     mailout = {
-        'start_time': datetime(2023, 7, 12).isoformat(),
-        'finish_time': datetime(2023, 7, 13).isoformat(),
-        'available_start': time(9, 0, 0).isoformat(),
-        'available_finish': time(18, 0, 0).isoformat()
+        'start_at': datetime(2023, 7, 12).isoformat(),
+        'finish_at': datetime(2023, 7, 13).isoformat(),
+        'available_start_at': time(9, 0, 0).isoformat(),
+        'available_finish_at': time(18, 0, 0).isoformat(),
+        'text_message': 'Test message',
     }
     response = await async_client_authenticated.post(
         '/api/mailouts/',
@@ -33,7 +34,8 @@ async def test_get_mailouts(async_client):
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
-    assert all(['start_time' in m for m in mailouts])
+    assert all(['start_at' in m for m in mailouts])
+    assert all(['text_message' in m for m in mailouts])
 
 
 @pytest.mark.asyncio
@@ -41,10 +43,11 @@ async def test_create_mailout(async_client_authenticated):
     mailout, response = await create_mailout(async_client_authenticated)
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()['start_time'] == mailout['start_time']
-    assert response.json()['finish_time'] == mailout['finish_time']
-    assert response.json()['available_start'] == mailout['available_start']
-    assert response.json()['available_finish'] == mailout['available_finish']
+    assert response.json()['start_at'] == mailout['start_at']
+    assert response.json()['finish_at'] == mailout['finish_at']
+    assert response.json()['available_start_at'] == mailout['available_start_at']
+    assert response.json()['available_finish_at'] == mailout['available_finish_at']
+    assert response.json()['text_message'] == mailout['text_message']
 
 
 @pytest.mark.asyncio
@@ -56,11 +59,12 @@ async def test_get_mailout(async_client_authenticated, async_client):
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['start_time'] == mailout['start_time']
-    assert response.json()['finish_time'] == mailout['finish_time']
-    assert response.json()['available_start'] == mailout['available_start']
-    assert response.json()['available_finish'] == mailout['available_finish']
+    assert response.json()['start_at'] == mailout['start_at']
+    assert response.json()['finish_at'] == mailout['finish_at']
+    assert response.json()['available_start_at'] == mailout['available_start_at']
+    assert response.json()['available_finish_at'] == mailout['available_finish_at']
     assert response.json()['id'] == response_create.json()['id']
+    assert response.json()['text_message'] == mailout['text_message']
 
 
 @pytest.mark.asyncio
@@ -78,26 +82,29 @@ async def test_delete_mailout(async_client_authenticated):
 async def test_update_mailout(async_client_authenticated):
     mailout, response_create = await create_mailout(async_client_authenticated)
 
-    new_start_time = datetime(2024, 7, 12).isoformat()
-    new_finish_time = datetime(2024, 7, 13).isoformat()
-    new_available_start = time(8, 0, 0).isoformat()
-    new_available_finish = time(19, 0, 0).isoformat()
+    new_start_at = datetime(2024, 7, 12).isoformat()
+    new_finish_at = datetime(2024, 7, 13).isoformat()
+    new_available_start_at = time(8, 0, 0).isoformat()
+    new_available_finish_at = time(19, 0, 0).isoformat()
+    new_text_message = 'New text message'
 
     response = await async_client_authenticated.put(
         f"/api/mailouts/{response_create.json()['id']}",
         json={
-            'start_time': new_start_time,
-            'finish_time': new_finish_time,
-            'available_start': new_available_start,
-            'available_finish': new_available_finish
+            'start_at': new_start_at,
+            'finish_at': new_finish_at,
+            'available_start_at': new_available_start_at,
+            'available_finish_at': new_available_finish_at,
+            'text_message': new_text_message
         },
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['start_time'] == new_start_time
-    assert response.json()['finish_time'] == new_finish_time
-    assert response.json()['available_start'] == new_available_start
-    assert response.json()['available_finish'] == new_available_finish
+    assert response.json()['start_at'] == new_start_at
+    assert response.json()['finish_at'] == new_finish_at
+    assert response.json()['available_start_at'] == new_available_start_at
+    assert response.json()['available_finish_at'] == new_available_finish_at
+    assert response.json()['text_message'] == new_text_message
     assert response.json()['id'] == response_create.json()['id']
 
 

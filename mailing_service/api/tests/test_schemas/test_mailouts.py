@@ -14,35 +14,39 @@ def test_mailout_instance_empty():
 def test_mailout_instance_start_time_empty():
     with pytest.raises(expected_exception=ValidationError):
         MailoutCreate(
-            finish_time=datetime(2023, 7, 12),
-            available_start=time(9, 0, 0),
-            available_finish=time(18, 0, 0),
+            finish_at=datetime(2023, 7, 12),
+            available_start_at=time(9, 0, 0),
+            available_finish_at=time(18, 0, 0),
+            text_message='Test message',
         )
 
 
 def test_mailout_instance_finish_time_empty():
     with pytest.raises(expected_exception=ValidationError):
         MailoutCreate(
-            start_time=datetime(2023, 7, 12),
-            available_start=time(9, 0, 0),
-            available_finish=time(18, 0, 0),
+            start_at=datetime(2023, 7, 12),
+            available_start_at=time(9, 0, 0),
+            available_finish_at=time(18, 0, 0),
+            text_message='Test message',
         )
 
 
 def test_mailout_instance_available_start_empty():
     mailout = MailoutCreate(
-        start_time=datetime(2023, 7, 12),
-        finish_time=datetime(2023, 7, 13),
-        available_finish=time(18, 0, 0),
+        start_at=datetime(2023, 7, 12),
+        finish_at=datetime(2023, 7, 13),
+        available_finish_at=time(18, 0, 0),
+        text_message='Test message',
     )
     assert mailout is not None
 
 
 def test_mailout_instance_available_finish_empty():
     mailout = MailoutCreate(
-        start_time=datetime(2023, 7, 12),
-        finish_time=datetime(2023, 7, 13),
-        available_start=time(9, 0, 0),
+        start_at=datetime(2023, 7, 12),
+        finish_at=datetime(2023, 7, 13),
+        available_start_at=time(9, 0, 0),
+        text_message='Test message',
     )
     assert mailout is not None
 
@@ -50,8 +54,19 @@ def test_mailout_instance_available_finish_empty():
 def test_mailout_instance_wrong_format():
     with pytest.raises(expected_exception=ValidationError):
         MailoutCreate(
-            start_time='2023/07/12',
-            finish_time=2023,
-            available_start='09:00',
-            available_finish=18,
+            start_at='2023/07/12',
+            finish_at=2023,
+            available_start_at='09:00',
+            available_finish_at=18,
+            text_message='Test message',
+        )
+
+
+def test_mailout_instance_message_empty():
+    with pytest.raises(expected_exception=ValidationError):
+        MailoutCreate(
+            start_at=datetime(2023, 7, 11),
+            finish_at=datetime(2023, 7, 12),
+            available_start_at=time(9, 0, 0),
+            available_finish_at=time(18, 0, 0),
         )

@@ -12,6 +12,8 @@ from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead, Phone
 from schemas.tags import Tag, TagCreate, TagRead, TagUpdate
 from schemas.mailouts import Mailout, MailoutCreate, MailoutRead, MailoutUpdate
 from schemas.users import User
+from services.sender.celery_worker import process_mailout
+from utils.logging import logger
 
 router = APIRouter(prefix='/mailouts')
 
@@ -204,4 +206,28 @@ async def delete_mailout_phone_code(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Mailout or phone code not found'
+        )
+
+
+@router.get(
+    '/{mailout_id}/start',
+    status_code=status.HTTP_200_OK,
+    name='start_mailout',
+)
+async def start_mailout(
+    mailout_id: int,
+    repository: MailoutRepository = Depends(get_repository(MailoutRepository)),
+    user: User = Depends(get_current_user),
+):
+    try:
+        instance = await repository.get(mailout_id)
+        process_mailout.delay(instance.id)
+        result = f'Mailout {instance.id} set to processing'
+        logger.info(result)
+        return result
+    except EntityDoesNotExist:
+        logger.info(f'Mailout with ID={mailout_id} not found')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Mailout with ID={mailout_id} not found'
         )

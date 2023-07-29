@@ -7,8 +7,6 @@
 
 To integrate with the project under development in this task, there is an external service that can receive requests to send messages to customers.
 
-[Original task in Russian](https://www.craft.do/s/n6OVYFVUpq0o6L)
-
 ### Mailout logic
 
 - After creating a new mailout, if the current time is greater than the start time and less than the end time, all customers that match the filter values specified in this mailout must be selected from the database and sending should be started for all these customers.
@@ -19,7 +17,7 @@ To integrate with the project under development in this task, there is an extern
 
 ## Tech stack
 
-<img src="https://img.shields.io/badge/FastAPI-fc884d?style=for-the-badge&logo=fastapi&logoColor=black"/> <img src="https://img.shields.io/badge/Pytest-fc884d?style=for-the-badge&logo=Pytest&logoColor=black"/> <img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/> <img src="https://img.shields.io/badge/Docker-9a7b4d?style=for-the-badge&logo=Docker&logoColor=black"/>
+<img src="https://img.shields.io/badge/FastAPI-fc884d?style=for-the-badge&logo=fastapi&logoColor=black"/> <img src="https://img.shields.io/badge/Redis-fc884d?style=for-the-badge&logo=Redis&logoColor=black"/> <img src="https://img.shields.io/badge/Celery-fc884d?style=for-the-badge"/> <img src="https://img.shields.io/badge/Pytest-fc884d?style=for-the-badge&logo=Pytest&logoColor=black"/> <img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/> <img src="https://img.shields.io/badge/Docker-9a7b4d?style=for-the-badge&logo=Docker&logoColor=black"/>
 
 ## Tasks
 
@@ -34,13 +32,14 @@ To integrate with the project under development in this task, there is an extern
 - [x] API documentation for integration with the developed service. Description of implemented methods in OpenAPI format.
 - [x] Obtaining general statistics on the created mailouts and the number of sent messages on them, grouped by status.
 - [x] Obtaining detailed statistics of sent messages for a specific mailout.
-- [ ] Processing active mailouts and sending messages to customers.
-- [ ] Automatic launch of mailouts according to the schedule (once per minute) with Celery.
-- [ ] Implement the return of metrics in the prometheus format and document the endpoints and exported metrics.
+- [x] Processing active mailouts and sending messages to customers. Messages are sent to the remote service https://probe.fbrq.cloud/v1/send using the received token.
+- [x] Automatic launch of mailouts according to the schedule (once per minute) with Celery.
+- [x] Implement the return of metrics in the prometheus format and document the endpoints and exported metrics.
 - [x] Provide detailed logging at all stages of request processing, so that during operation it is possible to find all information on:
   - mailout id: all logs for a specific mailout (both API requests and external requests to send specific messages);
   - message id: for a specific message (all requests and responses from an external service, all processing of a specific message);
   - customer id: any operations that are associated with a specific customer (adding, editing, sending a message, etc.).
+- [x] Flower tracking web interface.
 - [ ] Implement an additional service that sends statistics on processed mailouts to an email address once a day.
 - [ ] Provide automated build/testing with GitLab CI.
 - [ ] Write configuration files (deployment, ingress, etc.) to run the project in Kubernetes and describe how to apply them to a running cluster.
@@ -80,6 +79,7 @@ To integrate with the project under development in this task, there is an extern
 | POST               | /{mailout_id}/tags/{tag_id}               | Delete mailout tag        |
 | POST               | /{mailout_id}/phone_codes                 | Create mailout phone_code |
 | POST               | /{mailout_id}/phone_codes/{phone_code_id} | Delete mailout phone_code |
+| GET                | /{mailout_id}/start                       | Start mailout             |
 | **---MESSAGES**    | **/api/messages/**                        |                           |
 | POST               | /                                         | Add message               |
 | GET                | /                                         | Get mailouts              |
@@ -105,10 +105,48 @@ To integrate with the project under development in this task, there is an extern
 | PUT                | /{tag_id}                                 | Change tag by ID          |
 | DELETE             | /{tag_id}                                 | Delete tag by ID          |
 
+## Prometheus metrics
+
+- ```mailouts_total_created```: total number of mailouts created
+- ```customers_total_created```: total number of customers created
+- ```messages_total_sent```: total number of messages successfully sent per mailout id
+- ```messages_total_failed```: total number of messages failed (after a number of retries) per mailout id
+
 ## Commands
 
-- Create network so that Docker Compose can work: ```docker network create my-net```
+### Project setup
+
+- Create .env file in the root of the project:
+```
+TITLE=Mailing Service
+DESCRIPTION=Mailing Service
+OPENAPI_PREFIX=""
+DEBUG=True
+
+POSTGRES_SERVER=db_postgres
+POSTGRES_USER=postgres
+POSTGRES_PORT=5432
+POSTGRES_PASSWORD=your_password              <- change this
+POSTGRES_DB=mailing_db
+POSTGRES_DB_TESTS=mailing_db_2
+
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
+```
+- Create network: ```docker network create my-net```
 - Start the containers: ```docker-compose up -d --build```
-- Stop the containers: ```docker-compose down```
+
+After setting up the project, visit the mailing service at ```localhost:8000/docs```.
+Visit the Flower web service at ```localhost:5555```. (Flower metrics: ```localhost:5555/metrics```.)
+
+### Additional commands
+
 - Run tests: ```docker exec -it fastapi_service poetry run pytest```
 - Run tests and get a coverage report: ```docker exec -it fastapi_service poetry run pytest --cov```
+- Remove the containers: ```docker-compose down```
+- Start Celery workers from inside the container:
+  - ```docker exec -it fastapi_service /bin/sh```
+  - ```poetry run celery -A services.sender.celery_worker worker --loglevel=info```
+- In new CMD tab, launch Flower monitoring web service from inside the container:
+  - ```docker exec -it fastapi_service /bin/sh```
+  - ```poetry run celery --broker=redis://redis:6379 --result-backend=redis://redis:6379 flower```

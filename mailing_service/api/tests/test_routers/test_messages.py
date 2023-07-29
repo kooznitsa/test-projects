@@ -11,7 +11,6 @@ async def create_message(async_client_authenticated):
     _, mailout_response = await create_mailout(async_client_authenticated)
 
     message = {
-        'text_message': 'Hello world',
         'mailout_id': mailout_response.json()['id'],
         'customer_id': customer_response.json()['id']
     }
@@ -33,11 +32,9 @@ async def create_messages(async_client_authenticated, qty: int = 1):
 @pytest.mark.asyncio
 async def test_get_messages(async_client):
     response = await async_client.get('/api/messages/')
-    messages = response.json()
 
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 0
-    assert all(['text_message' in m for m in messages])
 
 
 @pytest.mark.asyncio
@@ -45,7 +42,6 @@ async def test_create_message(async_client_authenticated):
     message, response = await create_message(async_client_authenticated)
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()['text_message'] == message['text_message']
     assert response.json()['created_at'] is not None
     assert response.json()['status'] == StatusEnum.created
     assert response.json()['mailout_id'] == message['mailout_id']
@@ -61,7 +57,6 @@ async def test_get_message(async_client_authenticated, async_client):
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['text_message'] == message['text_message']
     assert response.json()['created_at'] is not None
     assert response.json()['status'] == StatusEnum.created
     assert response.json()['mailout_id'] == message['mailout_id']
@@ -84,21 +79,18 @@ async def test_delete_message(async_client_authenticated):
 async def test_update_message(async_client_authenticated):
     message, response_create = await create_message(async_client_authenticated)
 
-    new_text_message = 'Test message'
     new_mailout_id = 1
     new_customer_id = 1
 
     response = await async_client_authenticated.put(
         f"/api/messages/{response_create.json()['id']}",
         json={
-            'text_message': new_text_message,
             'mailout_id': new_mailout_id,
             'customer_id': new_customer_id
         },
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['text_message'] == new_text_message
     assert response.json()['mailout_id'] == new_mailout_id
     assert response.json()['customer_id'] == new_customer_id
     assert response.json()['id'] == response_create.json()['id']

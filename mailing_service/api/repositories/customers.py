@@ -10,6 +10,7 @@ from schemas.phone_codes import PhoneCode, PhoneCodeCreate, PhoneCodeRead
 from schemas.timezones import Timezone, TimezoneCreate, TimezoneRead
 from schemas.tags import Tag, TagCreate, TagRead
 from schemas.customers import Customer, CustomerCreate, CustomerRead, CustomerUpdate
+from services.sender.metrics import customers_total_created
 
 
 def check_phone(phone):
@@ -38,6 +39,7 @@ class CustomerRepository(BaseRepository):
         if not phone_code or not timezone:
             raise EntityDoesNotExist
         else:
+            customers_total_created.inc()
             return await self._create_not_unique(self.model, model_create)
 
     async def list(

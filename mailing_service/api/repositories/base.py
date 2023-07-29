@@ -14,6 +14,13 @@ class BaseRepository:
         result = await self.session.scalars(query.options(selectinload('*')))
         return result.first()
 
+    async def get_list(self, query):
+        results = await self.session.exec(query.options(selectinload('*')))
+        try:
+            return results.scalars().all()
+        except AttributeError:
+            return results.all()
+
     async def _add_to_db(self, new_item):
         self.session.add(new_item)
         await self.session.commit()
@@ -39,8 +46,7 @@ class BaseRepository:
 
     async def list(self, model, limit: int = 50, offset: int = 0):
         query = select(model).order_by(model.id).offset(offset).limit(limit)
-        results = await self.session.exec(query)
-        return results.scalars().all()
+        return await self.get_list(query)
 
     async def get(self, model, model_id: int):
         if item := await self._get_instance(model, model_id):

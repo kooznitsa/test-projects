@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from sqlmodel import Session
 from sqlalchemy import select
@@ -101,12 +101,15 @@ def create_entries(session):
     customer2.tags.extend([tag3, tag4])
     add_to_db(session, customer2)
 
+    _now = datetime.utcnow()
+
     mailout = Mailout.from_orm(
         MailoutCreate(
-            start_time=datetime(2023, 6, 30, 10, 0, 0),
-            finish_time=datetime(2023, 6, 30, 11, 0, 0),
-            available_start=time(10, 0, 0),
-            available_finish=time(19, 0, 0),
+            start_at=_now,
+            finish_at=_now + timedelta(minutes=3),
+            available_start_at=time(10, 0, 0),
+            available_finish_at=time(19, 0, 0),
+            text_message='Hello world',
         )
     )
     mailout.tags.extend([tag1, tag2, tag3, tag4])
@@ -115,7 +118,6 @@ def create_entries(session):
 
     message1 = Message.from_orm(
         MessageCreate(
-            text_message='Test message 1',
             mailout_id=1,
             customer_id=1,
         )
@@ -124,23 +126,12 @@ def create_entries(session):
 
     message2 = Message.from_orm(
         MessageCreate(
-            text_message='Test message 2',
             status=StatusEnum.pending,
             mailout_id=1,
             customer_id=2,
         )
     )
     add_to_db(session, message2)
-
-    message3 = Message.from_orm(
-        MessageCreate(
-            text_message='Test message 3',
-            status=StatusEnum.pending,
-            mailout_id=1,
-            customer_id=2,
-        )
-    )
-    add_to_db(session, message3)
 
     user = User(username='shark')
     user.set_password('qwerty')

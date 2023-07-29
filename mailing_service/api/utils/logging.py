@@ -1,21 +1,31 @@
+from __future__ import absolute_import
+
 from json.decoder import JSONDecodeError
 import logging
+from logging.handlers import TimedRotatingFileHandler
+import os
 
+import celery
 from fastapi import Request
+
+
+@celery.signals.setup_logging.connect
+def on_setup_logging(**kwargs):
+    pass
 
 
 class LoggerConfig:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logfile = 'utils/logs/log_file.log'
+        self.logfile = os.path.join('utils/logs/log_file.log')
 
         self.handler_cmdline = logging.StreamHandler()
-        self.handler_file = logging.handlers.TimedRotatingFileHandler(
+        self.handler_file = TimedRotatingFileHandler(
             filename=self.logfile,
-            when='m',
+            when='H',
             backupCount=1,
         )
-        self.handler_cmdline.setLevel(logging.DEBUG)
+        self.handler_cmdline.setLevel(logging.INFO)
         self.handler_file.setLevel(logging.INFO)
 
         log_format = logging.Formatter(
@@ -31,7 +41,7 @@ class LoggerConfig:
 
         self.logger.addHandler(self.handler_cmdline)
         self.logger.addHandler(self.handler_file)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
 
     def info(self, msg: str) -> None:
         self.logger.info(msg)
